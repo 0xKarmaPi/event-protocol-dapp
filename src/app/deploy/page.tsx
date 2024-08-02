@@ -21,8 +21,8 @@ export default function DeployPage() {
 	);
 	return (
 		<div>
-			<div className="flex justify-center">
-				<Card className="md:min-w-[600px]">
+			<div className="flex justify-center pt-6 md:pt-0">
+				<Card className="w-[90%] md:min-w-[600px]">
 					<CardHeader>
 						<div className="w-full text-center text-2xl font-semibold">
 							Deploy Prediction Event
@@ -44,7 +44,7 @@ export default function DeployPage() {
 						<p className="mt-6 text-left font-bold">
 							Options Description
 						</p>
-						<div className="grid w-full grid-cols-2 gap-3">
+						<div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
 							<OptionSetup optionName="Option A" />
 							<OptionSetup optionName="Option B" />
 						</div>
@@ -67,7 +67,7 @@ export default function DeployPage() {
 						</p>
 						<div className="flex w-full flex-row gap-2">
 							<Button
-								className="from-primary bg-gradient-to-tr to-purple-500 text-white shadow-lg"
+								className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 								fullWidth
 							>
 								Pay SOL submit
