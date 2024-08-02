@@ -11,8 +11,12 @@
 		"format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\""
 	},
 	"dependencies": {
+		"@dynamic-labs/ethereum": "^2.3.7",
+		"@dynamic-labs/sdk-react-core": "^2.3.7",
+		"@dynamic-labs/solana": "^2.3.7",
+		"@dynamic-labs/wagmi-connector": "^2.3.7",
 		"@nextui-org/react": "^2.4.6",
-		"@tanstack/react-query": "^5.51.3",
+		"@tanstack/react-query": "^5.51.16",
 		"axios": "^1.7.2",
 		"clsx": "^2.1.1",
 		"cookies-next": "^4.2.1",
@@ -22,7 +26,9 @@
 		"next-auth": "^4.24.7",
 		"prettier-plugin-tailwindcss": "^0.6.5",
 		"react": "^18",
-		"react-dom": "^18"
+		"react-dom": "^18",
+		"viem": "^2.18.7",
+		"wagmi": "^2.12.2"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^19.3.0",

@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { NextUIProvider } from "@nextui-org/react";
+import DynamicProvider from "./DynamicProvider";
 
 export default function AppProvider({
 	children,
@@ -9,10 +10,12 @@ export default function AppProvider({
 	children: React.ReactNode;
 }) {
 	return (
-		<NextUIProvider>
-			<SessionProvider>
-				<main>{children}</main>
-			</SessionProvider>
-		</NextUIProvider>
+		<DynamicProvider>
+			<NextUIProvider>
+				<SessionProvider>
+					<main>{children}</main>
+				</SessionProvider>
+			</NextUIProvider>
+		</DynamicProvider>
 	);
 }
