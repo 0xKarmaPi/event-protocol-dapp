@@ -16,6 +16,8 @@ import Image from "next/image";
 import cx from "clsx";
 import { IEvent } from "@/types/event";
 import { shortAddress } from "@/utils/common";
+import { useCallback, useState } from "react";
+import { toast } from "react-toastify";
 
 const event: IEvent = {
 	id: "1",
@@ -50,6 +52,18 @@ const TOKEN_ICONS = {
 };
 export default function EventDetail({ params }: { params: { id: string } }) {
 	// TODO: Fetch event by params.id
+
+	const [selectedOption, setSelectedOption] = useState<number | undefined>();
+
+	const handleClickSubmit = useCallback(() => {
+		if (selectedOption === 0 || selectedOption === 1) {
+			toast("Submitted successfully", { type: "success" });
+		} else {
+			toast("Please select an option", { type: "error" });
+			return;
+		}
+	}, [selectedOption]);
+
 	return (
 		<div className="flex w-full flex-col items-center justify-center gap-4 md:py-10">
 			<Card className="w-full md:w-[600px] md:min-w-[600px]">
@@ -133,8 +147,32 @@ export default function EventDetail({ params }: { params: { id: string } }) {
 				</CardHeader>
 				<Divider />
 				<CardBody className="flex flex-col gap-2">
-					<div className="flex justify-between">
+					<p>Select option</p>
+					<div className="flex w-full flex-row gap-2">
+						<Button
+							color="success"
+							variant={selectedOption === 0 ? "solid" : "light"}
+							fullWidth
+							onClick={() => {
+								setSelectedOption(0);
+							}}
+						>
+							{event.options[0].description}
+						</Button>
+						<Button
+							color="danger"
+							variant={selectedOption === 1 ? "solid" : "light"}
+							fullWidth
+							onClick={() => {
+								setSelectedOption(1);
+							}}
+						>
+							{event.options[1].description}
+						</Button>
+					</div>
+					<div className="mt-4 flex justify-between">
 						<p>Vote amount</p>
+
 						<p className="flex items-center gap-2 text-right">
 							Balance: 500{" "}
 							<Image
@@ -150,49 +188,36 @@ export default function EventDetail({ params }: { params: { id: string } }) {
 					<div>
 						<Input
 							startContent={
-								<Image
-									src="/assets/solana.png"
-									width={24}
-									height={24}
-									alt="SOl"
-									className="h-8 w-8"
-								/>
+								TOKEN_ICONS[
+									event.options[selectedOption ?? 0]
+										.token as keyof typeof TOKEN_ICONS
+								]
 							}
-							endContent={"SOL"}
+							endContent={
+								event.options[selectedOption ?? 0].token
+							}
 							type="number"
 							placeholder="0"
 							min={0}
 							labelPlacement="outside"
 						/>
 					</div>
-					<div className="flex w-full flex-row gap-2">
-						<Button
-							color="success"
-							variant="flat"
-							fullWidth
-							onClick={() => {}}
-						>
-							{event.options[0].description}
-						</Button>
-						<Button
-							color="danger"
-							variant="flat"
-							fullWidth
-							onClick={() => {}}
-						>
-							{event.options[1].description}
-						</Button>
-					</div>
-					<div className="flex w-full flex-row gap-2">
-						<Button
-							variant="bordered"
-							color="warning"
-							fullWidth
-							onClick={() => {}}
-						>
-							🏆 Claim Reward
-						</Button>
-					</div>
+
+					<Button
+						className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
+						fullWidth
+						onClick={handleClickSubmit}
+					>
+						Submit Predict
+					</Button>
+					<Button
+						variant="bordered"
+						color="warning"
+						fullWidth
+						onClick={() => {}}
+					>
+						🏆 Claim Reward
+					</Button>
 				</CardBody>
 				<Divider />
 			</Card>

@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from "@/components/ui/Header";
 import AppProvider from "@/providers/AppProvider";
 import cx from "clsx";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,9 +24,10 @@ export default function RootLayout({
 			<body
 				className={cx(
 					inter.className,
-					"via-default-200 dark min-h-screen bg-gradient-to-tr from-slate-800 to-blue-950 font-sans antialiased",
+					"min-h-screen bg-gradient-to-tr from-slate-800 via-default-200 to-blue-950 font-sans antialiased dark",
 				)}
 			>
+				<ToastContainer theme="light" />
 				<AppProvider>
 					<Header />
 					{children}

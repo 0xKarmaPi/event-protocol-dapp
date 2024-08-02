@@ -10,11 +10,11 @@ import { shortAddress } from "@/utils/common";
 import SelectTokenModal from "./SelectTokenModal";
 
 export type TokenOption = {
-	name: string;
-	value: string;
-	icon: React.ReactNode;
+	name?: string;
+	value?: string;
+	icon?: React.ReactNode;
 	address: string;
-	balance: number;
+	balance?: number;
 };
 export const TOKENS: TokenOption[] = [
 	{
@@ -40,7 +40,7 @@ export const TOKENS: TokenOption[] = [
 	},
 ];
 export default function OptionSetup({ optionName }: { optionName: string }) {
-	const [type, setType] = useState(TOKENS[1]);
+	const [type, setType] = useState(TOKENS[0]);
 	const [description, setDescription] = useState("");
 	const { isOpen, onOpen, onOpenChange } = useDisclosure();
 

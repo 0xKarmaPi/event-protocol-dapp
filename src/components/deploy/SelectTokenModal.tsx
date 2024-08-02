@@ -11,6 +11,7 @@ import {
 	Input,
 } from "@nextui-org/react";
 import { TokenOption, TOKENS } from "./OptionSetup";
+import { useCallback, useState } from "react";
 
 type SelectTokenModalProps = {
 	isOpen: boolean;
@@ -24,6 +25,32 @@ export default function SelectTokenModal({
 	onOpenChange,
 	onChangeType,
 }: SelectTokenModalProps) {
+	const [customToken, setCustomToken] = useState("");
+	const [errorCustomToken, setErrorCustomToken] = useState(false);
+
+	const handleConfirmCustomToken = useCallback(
+		(onClose: () => void) => {
+			if (!customToken) {
+				setErrorCustomToken(true);
+				return;
+			}
+
+			onChangeType({
+				value: "CUSTOM",
+				name: "CUSTOM",
+				address: customToken,
+				icon: (
+					<div className="flex aspect-square h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+						?
+					</div>
+				),
+			});
+			onClose();
+			setCustomToken("");
+		},
+		[customToken, onChangeType],
+	);
+
 	return (
 		<Modal
 			className="text-foreground"
@@ -47,7 +74,7 @@ export default function SelectTokenModal({
 									return (
 										<div
 											key={token.name}
-											className="text-foreground mb-2 flex w-full cursor-pointer items-center justify-between gap-1 rounded-xl bg-[#27272A] px-3 py-2 hover:opacity-80"
+											className="mb-2 flex w-full cursor-pointer items-center justify-between gap-1 rounded-xl bg-[#27272A] px-3 py-2 text-foreground hover:opacity-80"
 											onClick={() => {
 												onChangeType(token);
 												onClose();
@@ -82,20 +109,28 @@ export default function SelectTokenModal({
 									<p className="text-xs">or</p>
 									<Divider className="w-1/3" />
 								</div>
-
-								<div className="flex items-end gap-3">
+								<p className="text-xs">Custom Token</p>
+								<div className="flex items-start gap-3">
 									<div className="flex-1">
-										<p className="mb-2 text-xs">
-											Custom Token
-										</p>
 										<Input
+											errorMessage="Please enter a valid address"
+											isInvalid={errorCustomToken}
 											type="text"
 											placeholder="Address: 0x..."
 											className="w-full"
+											value={customToken}
+											onChange={(e) => {
+												setErrorCustomToken(false);
+												setCustomToken(e.target.value);
+											}}
 										/>
 									</div>
-
-									<Button className="bg-blue-500">
+									<Button
+										onClick={() =>
+											handleConfirmCustomToken(onClose)
+										}
+										className="bg-blue-500"
+									>
 										Confirm
 									</Button>
 								</div>

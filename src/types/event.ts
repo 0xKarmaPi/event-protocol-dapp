@@ -16,3 +16,7 @@ export interface IEventOption {
 	address: string;
 	amount: number;
 }
+
+export interface ICreateEventRequest {
+	description: string;
+}

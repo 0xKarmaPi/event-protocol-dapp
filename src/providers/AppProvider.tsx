@@ -11,7 +11,7 @@ export default function AppProvider({
 }) {
 	return (
 		<DynamicProvider>
-			<NextUIProvider>
+			<NextUIProvider locale="en-US">
 				<SessionProvider>
 					<main>{children}</main>
 				</SessionProvider>
