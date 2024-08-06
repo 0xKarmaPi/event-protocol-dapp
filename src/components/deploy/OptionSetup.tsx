@@ -52,12 +52,6 @@ export default function OptionSetup({ optionName }: { optionName: string }) {
 			<div>
 				<p className="text-left">{optionName}</p>
 				<div className="flex gap-2">
-					<Input
-						type="number"
-						className="flex-1"
-						label="Amount"
-						min={0}
-					/>
 					<div
 						className="mb-2 flex flex-1 cursor-pointer items-center justify-between rounded-xl bg-[#27272A] px-3 py-2"
 						onClick={onOpen}
@@ -80,7 +74,7 @@ export default function OptionSetup({ optionName }: { optionName: string }) {
 					type="text"
 					label="Description"
 					value={description}
-					onChange={(e) => {
+					onChange={(e: any) => {
 						setDescription(e.target.value);
 					}}
 				/>
