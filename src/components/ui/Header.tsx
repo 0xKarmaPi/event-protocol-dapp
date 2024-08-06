@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	Button,
 	Navbar,
 	NavbarContent,
 	NavbarItem,
@@ -13,8 +14,8 @@ import { NAV_BARS } from "@/utils/constants";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
-import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
 import { useState } from "react";
+import ConnectWalletButton from "./ConnectWalletButton";
 
 export default function Header() {
 	const pathname = usePathname();
@@ -69,10 +70,11 @@ export default function Header() {
 			</NavbarContent>
 			<NavbarContent justify="end">
 				<NavbarItem>
-					<DynamicWidget
+					{/* <DynamicWidget
 						innerButtonComponent={<p>Connect Wallet</p>}
 						variant="modal"
-					/>
+					/> */}
+					<ConnectWalletButton />
 				</NavbarItem>
 			</NavbarContent>
 		</Navbar>

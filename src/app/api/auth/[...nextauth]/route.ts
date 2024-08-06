@@ -2,7 +2,6 @@ import { COOKIES } from "@/utils/constants";
 import { setCookie } from "cookies-next";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
 
 const handler = NextAuth({
 	providers: [
@@ -12,22 +11,20 @@ const handler = NextAuth({
 			name: "Credentials",
 			credentials: {
 				username: {
-					label: "Username",
 					type: "text",
 				},
-				password: { label: "Password", type: "password" },
+				address: { type: "text" },
+				id: {
+					type: "text",
+				},
 			},
 			async authorize(credentials, req) {
 				return {
-					id: credentials?.username ?? "id",
-					name: credentials?.username ?? "User name",
-					email: "Email@gmail.com",
+					id: credentials?.id ?? "id",
+					name: credentials?.username ?? "username",
+					email: credentials?.address ?? "address",
 				};
 			},
-		}),
-		Google({
-			clientId: "YOUR_CLIENT_ID",
-			clientSecret: "YOUR_CLIENT_SECRET",
 		}),
 	],
 
@@ -50,14 +47,10 @@ const handler = NextAuth({
 			return token;
 		},
 		async session({ session, token }) {
-			// Add custom properties to the session object
-			// session.user.id = token.id;
 			return session;
 		},
 	},
 	secret: "secret",
-	pages: {
-		// signIn: "/auth/signin", // Custom sign in page
-	},
+	pages: {},
 });
 export { handler as GET, handler as POST };
