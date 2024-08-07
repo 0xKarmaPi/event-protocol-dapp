@@ -13,7 +13,7 @@ export const NAV_BARS = [
 		path: "/prediction-events",
 	},
 	{
-		name: "IDO",
-		path: "/ido",
+		name: "IVO",
+		path: "/ivo",
 	},
 ];

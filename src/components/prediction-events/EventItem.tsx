@@ -41,17 +41,17 @@ export default function EventItem({ event }: EventItemProps) {
 						<p
 							className={cx(
 								"text-xs",
-								dayjs(Number(event.end)).isBefore(Date.now())
+								dayjs(event.end).isBefore(Date.now())
 									? "text-red-500"
 									: "text-green-500",
 							)}
 						>
-							{dayjs(Number(event.end)).isBefore(Date.now())
+							{dayjs(event.end).isBefore(Date.now())
 								? "Ended"
 								: "End Time"}
 							<br />
-							{dayjs(Number(event.end)).isAfter(Date.now()) &&
-								dayjs(Number(event.end)).format(
+							{dayjs(event.end).isAfter(Date.now()) &&
+								dayjs(event.end).format(
 									"YYYY-MM-DD HH:mm:ss UTC Z",
 								)}
 						</p>
@@ -86,7 +86,7 @@ export default function EventItem({ event }: EventItemProps) {
 					</div>
 				</div>
 				<Link href={`/prediction-events/${event.id}`}>
-					<Button className="from-primary bg-gradient-to-tr to-purple-400 text-white shadow-lg">
+					<Button className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg">
 						View Detail
 					</Button>
 				</Link>

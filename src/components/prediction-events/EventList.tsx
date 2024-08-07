@@ -9,7 +9,7 @@ const events: IEvent[] = [
 		description:
 			"Description lorem text? Long text here Description lorem text? Long text here",
 		start: "2022-10-01T00:00:00.000Z",
-		end: "2022-10-01T00:00:00.000Z",
+		end: "2024-10-01T00:00:00.000Z",
 		options: [
 			{
 				id: "1",
@@ -35,7 +35,7 @@ const events: IEvent[] = [
 		name: "Karma",
 		description: "Karma",
 		start: "2022-10-01T00:00:00.000Z",
-		end: "2022-10-01T00:00:00.000Z",
+		end: "2025-10-01T00:00:00.000Z",
 		options: [
 			{
 				id: "1",
@@ -85,7 +85,7 @@ const events: IEvent[] = [
 export default function EventList() {
 	return (
 		<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-			{[...events, ...events].map((event) => (
+			{events.map((event) => (
 				<EventItem key={event.id} event={event} />
 			))}
 		</div>

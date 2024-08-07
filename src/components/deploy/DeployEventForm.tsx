@@ -37,7 +37,10 @@ export default function DeployEventForm() {
 	};
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<form
+			onSubmit={handleSubmit(onSubmit)}
+			className="flex items-center justify-center"
+		>
 			<Card className="w-[90%] md:min-w-[600px]">
 				<CardHeader>
 					<div className="w-full text-center text-2xl font-semibold">

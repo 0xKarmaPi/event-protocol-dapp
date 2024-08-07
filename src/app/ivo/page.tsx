@@ -3,7 +3,6 @@
 import {
 	Card,
 	CardHeader,
-	Progress,
 	Divider,
 	CardBody,
 	Button,
@@ -15,7 +14,7 @@ import {
 import dayjs from "dayjs";
 import Image from "next/image";
 
-export default function IDOPage() {
+export default function IVOPage() {
 	const progressValue = 90;
 	const isClient = true;
 	const staticstics = [
@@ -52,7 +51,7 @@ export default function IDOPage() {
 							/>
 							<div className="flex flex-col text-left">
 								<p className="text-md text-primary">
-									Eventprotocol IDO
+									Eventprotocol IVO
 								</p>
 								<p className="text-small">Eventprotocol</p>
 							</div>
@@ -85,7 +84,7 @@ export default function IDOPage() {
 								value={progressValue}
 								strokeWidth={4}
 								showValueLabel={true}
-								label="IDO Progress"
+								label="IVO Progress"
 							/>
 						</div>
 						<p>Statistics</p>
@@ -144,7 +143,7 @@ export default function IDOPage() {
 						<div className="flex w-full flex-row gap-2">
 							{isClient && (
 								<Button
-									className="from-primary bg-gradient-to-tr to-purple-500 text-white shadow-lg"
+									className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 									fullWidth
 									onClick={() => {}}
 								>
