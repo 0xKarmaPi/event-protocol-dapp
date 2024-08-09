@@ -9,7 +9,7 @@ import {
 	DropdownTrigger,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import bs58 from "bs58";
 import { toast } from "react-toastify";
 import { shortAddress } from "@/utils/common";
@@ -17,13 +17,14 @@ import Image from "next/image";
 import sol from "/public/assets/solana.png";
 import phantom from "/public/assets/phantom-icon.png";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiUser } from "react-icons/fi";
 import { deleteCookie, setCookie } from "cookies-next";
 import { COOKIES } from "@/utils/constants";
+import { useRouter } from "next/navigation";
 
 export default function ConnectWalletButton() {
-	const [connecting, setConnecting] = useState(false);
 	const session = useSession();
+	const router = useRouter();
 
 	const getProvider = () => {
 		if ("phantom" in window) {
@@ -39,8 +40,7 @@ export default function ConnectWalletButton() {
 	const mutateSignIn = useMutation({
 		mutationFn: signInService,
 		mutationKey: ["signIn"],
-		onSuccess: async (data, variables) => {
-			console.log(data);
+		onSuccess: async (data) => {
 			toast("Connected successfully", { type: "success" });
 			signIn("credentials", {
 				username: data.user.username,
@@ -49,8 +49,7 @@ export default function ConnectWalletButton() {
 			});
 			setCookie(COOKIES.ACCESSTOKEN, data.accessToken);
 		},
-		onError: (error) => {
-			console.log(error);
+		onError: () => {
 			toast("Failed to connect", { type: "error" });
 		},
 	});
@@ -89,6 +88,10 @@ export default function ConnectWalletButton() {
 		}
 	}, []);
 
+	const handleClickProfile = () => {
+		router.push("/profile");
+	};
+
 	if (session?.data?.user) {
 		return (
 			<Dropdown className="text-white">
@@ -117,6 +120,13 @@ export default function ConnectWalletButton() {
 					</Button>
 				</DropdownTrigger>
 				<DropdownMenu>
+					<DropdownItem
+						onClick={handleClickProfile}
+						key="myProfile"
+						startContent={<FiUser />}
+					>
+						My Profile
+					</DropdownItem>
 					<DropdownItem
 						onClick={handleDisconnect}
 						key="disconnect"
