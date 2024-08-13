@@ -46,6 +46,7 @@ export default function Header() {
 									pathname === item.path,
 							})}
 							href={item.path || "#"}
+							target={item.target || "_self"}
 						>
 							{item.name}
 						</Link>
@@ -62,6 +63,7 @@ export default function Header() {
 									pathname === item.path,
 							})}
 							href={item.path || "#"}
+							target={item.target || "_self"}
 						>
 							{item.name}
 						</Link>
