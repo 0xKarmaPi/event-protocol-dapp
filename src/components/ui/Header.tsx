@@ -45,7 +45,7 @@ export default function Header() {
 								"font-bold !text-primary":
 									pathname === item.path,
 							})}
-							href={item.path}
+							href={item.path || "#"}
 						>
 							{item.name}
 						</Link>
@@ -61,7 +61,7 @@ export default function Header() {
 								"font-bold !text-primary":
 									pathname === item.path,
 							})}
-							href={item.path}
+							href={item.path || "#"}
 						>
 							{item.name}
 						</Link>

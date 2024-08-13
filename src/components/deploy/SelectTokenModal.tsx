@@ -12,6 +12,7 @@ import {
 } from "@nextui-org/react";
 import { TokenOption, TOKENS } from "./OptionSetup";
 import { useCallback, useState } from "react";
+import { GiTwoCoins } from "react-icons/gi";
 
 type SelectTokenModalProps = {
 	isOpen: boolean;
@@ -41,7 +42,7 @@ export default function SelectTokenModal({
 				address: customToken,
 				icon: (
 					<div className="flex aspect-square h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
-						?
+						<GiTwoCoins className="h-6 w-6 text-yellow-400" />
 					</div>
 				),
 			});

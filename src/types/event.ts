@@ -1,22 +1,47 @@
 export interface IEvent {
-	id: string;
-	address: string;
-	name: string;
+	id?: string;
+	userId?: string;
 	description: string;
-	start: string;
-	end: string;
+	createdAt?: string;
+	author?: {
+		username: string;
+		address: string;
+	};
+	address?: string;
+	endTime: string;
 	options: IEventOption[];
 }
 
 export interface IEventOption {
-	id: string;
-	name: string;
+	id?: string;
+	name?: string;
 	description: string;
 	token: string;
-	address: string;
-	amount: number;
+	address?: string;
+	amount?: number;
+	isCorrect?: boolean;
 }
 
 export interface ICreateEventRequest {
 	description: string;
+	endTime: string;
+	options: IOptionCreateEvent[];
+}
+
+export interface IOptionCreateEvent {
+	description: string;
+	token: string;
+	address?: string;
+	isCorrect?: boolean;
+}
+
+export interface IGetEventsRequest {
+	page: number;
+	limit: number;
+}
+
+export interface IPagination<T> {
+	list: T[];
+	maxPage: number;
+	total: number;
 }

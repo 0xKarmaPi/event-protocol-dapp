@@ -13,26 +13,57 @@ import {
 import OptionSetup from "./OptionSetup";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import dayjs from "dayjs";
+import { useDeployEventStore } from "@/configs/zustand";
+import { useEffect } from "react";
+import { parseDate, parseDateTime } from "@internationalized/date";
+import { useSession } from "next-auth/react";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
+import { deployEvent } from "@/services/event";
 
 type EventInputs = {
 	description: string;
-	endDate: DateValue;
+	endTime: DateValue;
 };
 const LIMIT_DESCRIPTION = 144;
 
 export default function DeployEventForm() {
+	const session = useSession();
+	const { event, updateDeployEvent } = useDeployEventStore();
+
+	const mutateDeployEvent = useMutation({
+		mutationKey: ["deployEvent"],
+		mutationFn: deployEvent,
+		onError: () => {},
+		onSuccess: (data) => {},
+	});
+
 	const {
 		register,
 		handleSubmit,
-		getValues,
+		setValue,
 		control,
 		formState: { errors },
 	} = useForm<EventInputs>();
 
+	useEffect(() => {
+		if (event) {
+			setValue("description", event?.description);
+			setValue("endTime", parseDateTime(event?.endTime));
+		}
+	}, [event, setValue]);
+
 	const onSubmit: SubmitHandler<EventInputs> = (data) => {
-		console.log({
-			...data,
-			endDate: dayjs(getValues("endDate").toString()).format(),
+		if (!session.data?.user) {
+			toast("Please connect your wallet", { type: "error" });
+			return;
+		}
+		mutateDeployEvent.mutate({
+			description: data.description,
+			endTime: dayjs(data.endTime.toString()).format(
+				"YYYY-MM-DDTHH:mm:ss.SSS[Z]",
+			),
+			options: event?.options,
 		});
 	};
 
@@ -80,7 +111,7 @@ export default function DeployEventForm() {
 					<div className="z-50 flex w-full items-start gap-2">
 						<Controller
 							control={control}
-							name="endDate"
+							name="endTime"
 							rules={{
 								required: {
 									value: true,
@@ -95,8 +126,8 @@ export default function DeployEventForm() {
 									onChange={(date) => {
 										field.onChange(date);
 									}}
-									errorMessage={errors?.endDate?.message}
-									isInvalid={!!errors?.endDate}
+									errorMessage={errors?.endTime?.message}
+									isInvalid={!!errors?.endTime}
 									label="Select End Date"
 								/>
 							)}
@@ -114,6 +145,7 @@ export default function DeployEventForm() {
 							className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 							fullWidth
 							type="submit"
+							isLoading={mutateDeployEvent.isPending}
 						>
 							Pay SOL submit
 						</Button>

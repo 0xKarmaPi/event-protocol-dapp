@@ -1,91 +1,46 @@
-import { IEvent } from "@/types/event";
 import EventItem from "./EventItem";
+import { useQuery } from "@tanstack/react-query";
+import { getEvents } from "@/services/event";
+import { Card, Skeleton } from "@nextui-org/react";
 
-const events: IEvent[] = [
-	{
-		id: "1",
-		address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-		name: "Karma",
-		description:
-			"Description lorem text? Long text here Description lorem text? Long text here",
-		start: "2022-10-01T00:00:00.000Z",
-		end: "2024-10-01T00:00:00.000Z",
-		options: [
-			{
-				id: "1",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-			{
-				id: "2",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-		],
-	},
-	{
-		id: "2",
-		address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-		name: "Karma",
-		description: "Karma",
-		start: "2022-10-01T00:00:00.000Z",
-		end: "2025-10-01T00:00:00.000Z",
-		options: [
-			{
-				id: "1",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-			{
-				id: "2",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-		],
-	},
-	{
-		id: "3",
-		address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-		name: "Karma",
-		description: "Karma",
-		start: "2022-10-01T00:00:00.000Z",
-		end: "2022-10-01T00:00:00.000Z",
-		options: [
-			{
-				id: "1",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-			{
-				id: "2",
-				name: "Karma",
-				description: "Karma",
-				token: "Karma",
-				address: "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
-				amount: 100,
-			},
-		],
-	},
-];
 export default function EventList() {
+	const { data: events, isPending } = useQuery({
+		queryKey: ["events"],
+		queryFn: () =>
+			getEvents({
+				limit: 15,
+				page: 1,
+			}),
+	});
+	if (isPending)
+		return (
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+				{Array(6)
+					.fill(0)
+					.map((_, index) => (
+						<Card key={index} className="space-y-5 p-4" radius="lg">
+							<Skeleton className="rounded-lg">
+								<div className="h-32 rounded-lg bg-default-300"></div>
+							</Skeleton>
+							<div className="space-y-3">
+								<Skeleton className="w-3/5 rounded-lg">
+									<div className="h-3 w-3/5 rounded-lg bg-default-200"></div>
+								</Skeleton>
+								<Skeleton className="w-4/5 rounded-lg">
+									<div className="h-3 w-4/5 rounded-lg bg-default-200"></div>
+								</Skeleton>
+								<Skeleton className="w-2/5 rounded-lg">
+									<div className="h-3 w-2/5 rounded-lg bg-default-300"></div>
+								</Skeleton>
+							</div>
+						</Card>
+					))}
+			</div>
+		);
+
 	return (
-		<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-			{events.map((event) => (
+		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+			{events?.list.map((event) => (
 				<EventItem key={event.id} event={event} />
 			))}
 		</div>

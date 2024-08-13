@@ -8,6 +8,7 @@ import {
 	CardBody,
 	Button,
 	Input,
+	Skeleton,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import { useState, useCallback } from "react";
@@ -17,44 +18,29 @@ import cx from "clsx";
 import sol from "/public/assets/solana.png";
 import jup from "/public/assets/jupiter.png";
 import raydium from "/public/assets/raydium.webp";
-import { IEvent } from "@/types/event";
+import { GiTwoCoins } from "react-icons/gi";
+import { useQuery } from "@tanstack/react-query";
+import { getEvent } from "@/services/event";
 
-const event: IEvent = {
-	id: "1",
-	address: "0x123hjb1212b4j1b24b12hjb4hj1b212412j124j1",
-	name: "Karmapi Battle 1",
-	description:
-		"Will China rank first in the medal table at the 2024 Paris Olympics?",
-	start: "2024-10-01T00:00:00.000Z",
-	end: "2024-10-01T00:00:00.000Z",
-	options: [
-		{
-			id: "1",
-			name: "Karmapi",
-			description: "YES",
-			token: "SOL",
-			address: "0x12dhqwd qwdqdw3",
-			amount: 100,
-		},
-		{
-			id: "2",
-			name: "Karmapi",
-			description: "NO",
-			token: "RAY",
-			address: "0x1891249124912423",
-			amount: 300,
-		},
-	],
-};
 const TOKEN_ICONS = {
 	SOL: <Image src={sol} alt="Solana" width={24} height={24} />,
 	RAY: <Image src={raydium} alt="Raydium" width={24} height={24} />,
 	JUP: <Image src={jup} alt="Jupiter" width={24} height={24} />,
+	CUSTOM: <GiTwoCoins className="h-6 w-6 text-yellow-500" />,
 };
 
-export default function EventDetailForm() {
+export default function EventDetailForm({ eventId }: { eventId?: string }) {
 	const [selectedOption, setSelectedOption] = useState<number | undefined>();
 
+	const {
+		data: event,
+		isPending,
+		isError,
+	} = useQuery({
+		queryKey: ["event"],
+		queryFn: () => getEvent(eventId!),
+		enabled: !!eventId,
+	});
 	const handleClickSubmit = useCallback(() => {
 		if (selectedOption === 0 || selectedOption === 1) {
 			toast("Submitted successfully", { type: "success" });
@@ -63,6 +49,38 @@ export default function EventDetailForm() {
 			return;
 		}
 	}, [selectedOption]);
+
+	if (isPending) {
+		return (
+			<Card className="w-[600px] space-y-5 p-4" radius="lg">
+				<Skeleton className="rounded-lg">
+					<div className="h-[300px] rounded-lg bg-default-300"></div>
+				</Skeleton>
+				<div className="space-y-3">
+					<Skeleton className="w-3/5 rounded-lg">
+						<div className="h-3 w-3/5 rounded-lg bg-default-200"></div>
+					</Skeleton>
+					<Skeleton className="w-4/5 rounded-lg">
+						<div className="h-3 w-4/5 rounded-lg bg-default-200"></div>
+					</Skeleton>
+					<Skeleton className="w-2/5 rounded-lg">
+						<div className="h-3 w-2/5 rounded-lg bg-default-300"></div>
+					</Skeleton>
+					<Skeleton className="w-3/5 rounded-lg">
+						<div className="h-3 w-3/5 rounded-lg bg-default-200"></div>
+					</Skeleton>
+					<Skeleton className="w-4/5 rounded-lg">
+						<div className="h-3 w-4/5 rounded-lg bg-default-200"></div>
+					</Skeleton>
+					<Skeleton className="w-2/5 rounded-lg">
+						<div className="h-3 w-2/5 rounded-lg bg-default-300"></div>
+					</Skeleton>
+				</div>
+			</Card>
+		);
+	}
+	if (isError)
+		return <p className="text-white">Prediction Event not found!</p>;
 	return (
 		<Card className="w-full md:w-[600px] md:min-w-[600px]">
 			<CardHeader className="flex flex-col gap-3">
@@ -87,17 +105,17 @@ export default function EventDetailForm() {
 							<p
 								className={cx(
 									"text-xs",
-									dayjs(event.end).isBefore(Date.now())
+									dayjs(event.endTime).isBefore(Date.now())
 										? "text-red-500"
 										: "text-green-500",
 								)}
 							>
-								{dayjs(event.end).isBefore(Date.now())
+								{dayjs(event.endTime).isBefore(Date.now())
 									? "Ended"
 									: "End Time"}
 								<br />
-								{dayjs(event.end).isAfter(Date.now()) &&
-									dayjs(event.end).format(
+								{dayjs(event.endTime).isAfter(Date.now()) &&
+									dayjs(event.endTime).format(
 										"YYYY-MM-DD HH:mm:ss UTC Z",
 									)}
 							</p>

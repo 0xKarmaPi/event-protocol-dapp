@@ -14,6 +14,6 @@ export const NAV_BARS = [
 	},
 	{
 		name: "IVO",
-		path: "/ivo",
+		path: process.env.NEXT_PUBLIC_IVO_APP_URL,
 	},
 ];
