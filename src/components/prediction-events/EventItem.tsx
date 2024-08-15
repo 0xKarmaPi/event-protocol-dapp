@@ -24,7 +24,7 @@ export default function EventItem({ event }: EventItemProps) {
 						<Image
 							alt="logo"
 							height={40}
-							src={"/assets/logo.jpg"}
+							src={"/assets/logo.png"}
 							width={40}
 							className="rounded-full"
 						/>

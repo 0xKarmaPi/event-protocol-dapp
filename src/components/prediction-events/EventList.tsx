@@ -1,3 +1,5 @@
+"use client";
+
 import EventItem from "./EventItem";
 import { useQuery } from "@tanstack/react-query";
 import { getEvents } from "@/services/event";
@@ -40,7 +42,7 @@ export default function EventList() {
 
 	return (
 		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{events?.list.map((event) => (
+			{events?.list?.map((event) => (
 				<EventItem key={event.id} event={event} />
 			))}
 		</div>

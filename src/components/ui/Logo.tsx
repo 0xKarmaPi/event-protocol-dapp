@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo from "/public/assets/logo.jpg";
+import logo from "/public/assets/logo.png";
 import { NavbarBrand } from "@nextui-org/react";
 import Link from "next/link";
 

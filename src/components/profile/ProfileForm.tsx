@@ -30,8 +30,7 @@ export default function ProfileForm() {
 	const {
 		register,
 		handleSubmit,
-		getValues,
-		control,
+		setValue,
 		formState: { errors },
 	} = useForm<UserProfile>();
 
@@ -51,6 +50,10 @@ export default function ProfileForm() {
 		// Cleanup
 		return () => URL.revokeObjectURL(objectUrl);
 	}, [selectedFile]);
+
+	useEffect(() => {
+		setValue("username", session.data?.user?.name ?? "");
+	}, [session.data?.user, setValue]);
 
 	const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files && e.target.files[0];

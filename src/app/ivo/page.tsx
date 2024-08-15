@@ -45,7 +45,7 @@ export default function IVOPage() {
 							<Image
 								alt="logo"
 								height={40}
-								src={"/assets/logo.jpg"}
+								src={"/assets/logo.png"}
 								width={40}
 								className="h-10 w-10 rounded-full"
 							/>
