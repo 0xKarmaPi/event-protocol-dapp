@@ -5,6 +5,10 @@ export const COOKIES = {
 
 export const NAV_BARS = [
 	{
+		name: "Dashboard",
+		path: "/dashboard",
+	},
+	{
 		name: "Deploy",
 		path: "/deploy",
 	},

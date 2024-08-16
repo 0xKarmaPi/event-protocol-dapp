@@ -10,6 +10,7 @@ export interface IEvent {
 	address?: string;
 	endTime: string;
 	options: IEventOption[];
+	result?: "WIN" | "LOSE";
 }
 
 export interface IEventOption {
@@ -20,6 +21,7 @@ export interface IEventOption {
 	address?: string;
 	amount?: number;
 	isCorrect?: boolean;
+	selected?: boolean;
 }
 
 export interface ICreateEventRequest {
