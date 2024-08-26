@@ -9,8 +9,7 @@ import {
 	DropdownTrigger,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback } from "react";
-import bs58 from "bs58";
+import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { shortAddress } from "@/utils/common";
 import Image from "next/image";
@@ -21,78 +20,69 @@ import { FiLogOut, FiUser } from "react-icons/fi";
 import { deleteCookie, setCookie } from "cookies-next";
 import { COOKIES } from "@/utils/constants";
 import { useRouter } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 export default function ConnectWalletButton() {
 	const session = useSession();
 	const router = useRouter();
-
-	const getProvider = () => {
-		if ("phantom" in window) {
-			const provider = (window.phantom as any).solana;
-
-			if (provider?.isPhantom) {
-				return provider;
-			}
-		}
-		window.open("https://phantom.app/", "_blank");
-	};
+	const { signMessage, publicKey, connected, disconnect } = useWallet();
 
 	const mutateSignIn = useMutation({
 		mutationFn: signInService,
 		mutationKey: ["signIn"],
 		onSuccess: async (data) => {
-			toast("Connected successfully", { type: "success" });
 			signIn("credentials", {
-				username: data.user.username,
-				address: data.user.address,
-				id: data.user.id,
+				username: publicKey?.toString()!,
+				address: publicKey?.toString()!,
+				id: publicKey?.toString()!,
+				redirect: false,
 			});
 			setCookie(COOKIES.ACCESSTOKEN, data.accessToken);
+			toast("Connected successfully", { type: "success" });
 		},
 		onError: () => {
 			toast("Failed to connect", { type: "error" });
+			disconnect();
 		},
 	});
 
 	const mutateGeneratePayload = useMutation({
 		mutationFn: generatePayload,
 		onSuccess: async (data) => {
-			const provider = getProvider(); // see "Detecting the Provider"
 			const encodedMessage = new TextEncoder().encode(data);
-			const { signature, publicKey } = (await provider?.signMessage(
-				encodedMessage,
-				"utf8",
-			)) as any;
+			const signed_message = await signMessage?.(encodedMessage);
 
 			mutateSignIn.mutate({
-				address: publicKey.toBase58(),
-				signature: bs58.encode(signature),
-				proof: data,
+				address: publicKey?.toBase58()!,
+				message: data,
+				signed_message: Buffer.from(signed_message!).toString("hex"),
 			});
+		},
+		onError: () => {
+			toast("Failed to connect", { type: "error" });
+			disconnect();
 		},
 	});
 
 	const handleDisconnect = useCallback(() => {
-		const provider = getProvider();
-		provider?.disconnect();
-		signOut({ callbackUrl: "/" });
+		disconnect();
+		// signOut({ callbackUrl: "/" });
 		deleteCookie(COOKIES.ACCESSTOKEN);
-	}, []);
-
-	const handleClickConnectWallet = useCallback(async () => {
-		const provider = getProvider(); // see "Detecting the Provider"
-		const res = await provider?.connect();
-
-		if (res?.publicKey) {
-			mutateGeneratePayload.mutate(res?.publicKey.toString());
-		}
-	}, []);
+	}, [disconnect]);
 
 	const handleClickProfile = () => {
 		router.push("/profile");
 	};
 
-	if (session?.data?.user) {
+	// useEffect(() => {
+	// 	console.log(session?.data?.user?.email, publicKey?.toString());
+	// 	if (connected && session?.data?.user?.email === undefined) {
+	// 		mutateGeneratePayload.mutate(publicKey?.toString()!);
+	// 	}
+	// }, [connected]);
+
+	if (connected) {
 		return (
 			<Dropdown className="text-white">
 				<DropdownTrigger>
@@ -116,7 +106,7 @@ export default function ConnectWalletButton() {
 							</div>
 						}
 					>
-						{shortAddress(session?.data?.user?.email)}
+						{shortAddress(publicKey?.toString()!)}
 					</Button>
 				</DropdownTrigger>
 				<DropdownMenu>
@@ -141,15 +131,5 @@ export default function ConnectWalletButton() {
 		);
 	}
 
-	return (
-		<Button
-			isLoading={
-				mutateGeneratePayload.isPending || mutateSignIn.isPending
-			}
-			onClick={handleClickConnectWallet}
-			className="bg-gradient-to-tr from-primary to-purple-400 text-white"
-		>
-			Connect Wallet
-		</Button>
-	);
+	return <WalletMultiButton />;
 }

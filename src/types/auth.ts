@@ -2,8 +2,8 @@ import { IUser } from "./user";
 
 export interface IAuthRequest {
 	address: string;
-	proof: string;
-	signature: string;
+	message: string;
+	signed_message: string;
 }
 
 export interface IAuthResponse {

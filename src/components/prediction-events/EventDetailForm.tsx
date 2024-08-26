@@ -103,17 +103,17 @@ export default function EventDetailForm({
 							<p
 								className={cx(
 									"text-xs",
-									dayjs(event?.endTime).isBefore(Date.now())
+									dayjs(event?.end_date).isBefore(Date.now())
 										? "text-red-500"
 										: "text-green-500",
 								)}
 							>
-								{dayjs(event?.endTime).isBefore(Date.now())
+								{dayjs(event?.end_date).isBefore(Date.now())
 									? "Ended"
 									: "End Time"}
 								<br />
-								{dayjs(event?.endTime).isAfter(Date.now()) &&
-									dayjs(event?.endTime).format(
+								{dayjs(event?.end_date).isAfter(Date.now()) &&
+									dayjs(event?.end_date).format(
 										"YYYY-MM-DD HH:mm:ss UTC Z",
 									)}
 							</p>
@@ -125,32 +125,38 @@ export default function EventDetailForm({
 				</div>
 
 				<div className="mt-8 grid w-full grid-cols-2 justify-around">
-					{event?.options?.map((option, index) => {
-						return (
-							<div
-								key={option.id}
-								className="flex flex-col items-center gap-2"
-							>
-								<div className="text-lg font-semibold">
-									Option {index + 1}:{` `}
-									{option.description}
-								</div>
+					<div className="flex flex-col items-center gap-2">
+						<div className="text-lg font-semibold">
+							Option 1:{` `}
+							{event.left_description}
+						</div>
 
-								<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
-									Vote amount:
-									<div className="flex">
-										{option.amount}{" "}
-										{
-											TOKEN_ICONS[
-												option.token as keyof typeof TOKEN_ICONS
-											]
-										}
-										{option.token}
-									</div>
-								</div>
+						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
+							Vote amount:
+							<div className="flex">
+								{event.left_amount ?? 0}{" "}
+								{event.left_mint
+									? shortAddress(event.left_mint)
+									: "SOL"}
 							</div>
-						);
-					})}
+						</div>
+					</div>
+					<div className="flex flex-col items-center gap-2">
+						<div className="text-lg font-semibold">
+							Option 2:{` `}
+							{event.right_description}
+						</div>
+
+						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
+							Vote amount:
+							<div className="flex">
+								{event.right_amount ?? 0}{" "}
+								{event.right_mint
+									? shortAddress(event.right_mint)
+									: "SOL"}
+							</div>
+						</div>
+					</div>
 				</div>
 			</CardHeader>
 			<Divider />
@@ -165,7 +171,7 @@ export default function EventDetailForm({
 							setSelectedOption(0);
 						}}
 					>
-						{event?.options[0].description}
+						{event?.left_description}
 					</Button>
 					<Button
 						color="danger"
@@ -175,7 +181,7 @@ export default function EventDetailForm({
 							setSelectedOption(1);
 						}}
 					>
-						{event?.options?.[1].description}
+						{event?.right_description}
 					</Button>
 				</div>
 				<div className="mt-4 flex justify-between">
@@ -195,13 +201,13 @@ export default function EventDetailForm({
 
 				<div>
 					<Input
-						startContent={
-							TOKEN_ICONS[
-								event?.options?.[selectedOption ?? 0]
-									.token as keyof typeof TOKEN_ICONS
-							]
-						}
-						endContent={event?.options[selectedOption ?? 0].token}
+						// startContent={
+						// 	TOKEN_ICONS[
+						// 		event?.options?.[selectedOption ?? 0]
+						// 			.token as keyof typeof TOKEN_ICONS
+						// 	]
+						// }
+						// endContent={event?.options[selectedOption ?? 0].token}
 						type="number"
 						placeholder="0"
 						min={0}

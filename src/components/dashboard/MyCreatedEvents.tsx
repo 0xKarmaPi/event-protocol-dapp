@@ -25,7 +25,7 @@ import {
 const rows: IEvent[] = [
 	{
 		description: "Real Madrid win the UEFA Super cup 2024?",
-		endTime: "2025-01-01T00:00:00.000Z",
+		endDate: "2025-01-01T00:00:00.000Z",
 		id: "1",
 		options: [
 			{
@@ -49,7 +49,7 @@ const rows: IEvent[] = [
 	},
 	{
 		description: "Real Madrid win the UEFA Super cup 2024?",
-		endTime: "2022-01-01T00:00:00.000Z",
+		endDate: "2022-01-01T00:00:00.000Z",
 		id: "2",
 		options: [
 			{
@@ -73,7 +73,7 @@ const rows: IEvent[] = [
 	},
 	{
 		description: "Will China Win?",
-		endTime: "2022-01-01T00:00:00.000Z",
+		endDate: "2022-01-01T00:00:00.000Z",
 		id: "3",
 		options: [
 			{
@@ -145,11 +145,11 @@ export default function MyCreatedEvents() {
 				);
 
 			case "status":
-				if (dayjs(event.endTime).isBefore(Date.now()))
+				if (dayjs(event.endDate).isBefore(Date.now()))
 					return (
 						<div className="w-[200px] text-right text-red-500">
 							<p>Ended</p>
-							{dayjs(event.endTime).format(
+							{dayjs(event.endDate).format(
 								"DD/MM/YYYY - HH:mm:ss A",
 							)}
 						</div>
@@ -157,7 +157,7 @@ export default function MyCreatedEvents() {
 				return (
 					<div className="w-[200px] text-right text-green-500">
 						<p>Ongoing</p>
-						{dayjs(event.endTime).format("DD/MM/YYYY - HH:mm:ss A")}
+						{dayjs(event.endDate).format("DD/MM/YYYY - HH:mm:ss A")}
 					</div>
 				);
 			case "action":

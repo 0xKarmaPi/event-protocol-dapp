@@ -41,17 +41,17 @@ export default function EventItem({ event }: EventItemProps) {
 						<p
 							className={cx(
 								"text-xs",
-								dayjs(event.endTime).isBefore(Date.now())
+								dayjs(event.end_date).isBefore(Date.now())
 									? "text-red-500"
 									: "text-green-500",
 							)}
 						>
-							{dayjs(event.endTime).isBefore(Date.now())
+							{dayjs(event.end_date).isBefore(Date.now())
 								? "Ended"
 								: "End Time"}
 							<br />
-							{dayjs(event.endTime).isAfter(Date.now()) &&
-								dayjs(event.endTime).format(
+							{dayjs(event.end_date).isAfter(Date.now()) &&
+								dayjs(event.end_date).format(
 									"YYYY-MM-DD HH:mm:ss UTC Z",
 								)}
 						</p>
@@ -70,24 +70,28 @@ export default function EventItem({ event }: EventItemProps) {
 							Option A:
 							<br />
 							<span className="text-lg">
-								{event.options[0].description}
+								{event.left_description}
 							</span>
 						</div>
-						<div className="text-sm opacity-60">
+						<div className="text-center text-sm opacity-60">
 							Acceptable Vote Tick:{` `}
-							{event.options[0].token}
+							{event.left_mint
+								? shortAddress(event.left_mint)
+								: "SOL"}
 						</div>
 					</div>
 					<div className="flex flex-col items-center gap-2">
 						<div className="text-center text-sm font-semibold">
 							Option B: <br />
 							<span className="text-lg">
-								{event.options[1].description}
+								{event.right_description}
 							</span>
 						</div>
-						<div className="text-sm opacity-60">
+						<div className="text-center text-sm opacity-60">
 							Acceptable Vote Tick:{` `}
-							{event.options[1].token}
+							{event.right_mint
+								? shortAddress(event.left_mint)
+								: "SOL"}
 						</div>
 					</div>
 				</div>

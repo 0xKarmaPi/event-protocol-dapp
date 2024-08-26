@@ -72,10 +72,6 @@ export default function Header() {
 			</NavbarContent>
 			<NavbarContent justify="end">
 				<NavbarItem>
-					{/* <DynamicWidget
-						innerButtonComponent={<p>Connect Wallet</p>}
-						variant="modal"
-					/> */}
 					<ConnectWalletButton />
 				</NavbarItem>
 			</NavbarContent>

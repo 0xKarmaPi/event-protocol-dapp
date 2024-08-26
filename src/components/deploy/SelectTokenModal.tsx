@@ -13,6 +13,7 @@ import {
 import { TokenOption, TOKENS } from "./OptionSetup";
 import { useCallback, useState } from "react";
 import { GiTwoCoins } from "react-icons/gi";
+import { web3 } from "@coral-xyz/anchor";
 
 type SelectTokenModalProps = {
 	isOpen: boolean;
@@ -31,23 +32,27 @@ export default function SelectTokenModal({
 
 	const handleConfirmCustomToken = useCallback(
 		(onClose: () => void) => {
-			if (!customToken) {
-				setErrorCustomToken(true);
-				return;
-			}
+			try {
+				if (!customToken || !new web3.PublicKey(customToken)) {
+					setErrorCustomToken(true);
+					return;
+				}
 
-			onChangeType({
-				value: "CUSTOM",
-				name: "CUSTOM",
-				address: customToken,
-				icon: (
-					<div className="flex aspect-square h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
-						<GiTwoCoins className="h-6 w-6 text-yellow-400" />
-					</div>
-				),
-			});
-			onClose();
-			setCustomToken("");
+				onChangeType({
+					value: "CUSTOM",
+					name: "CUSTOM",
+					address: customToken,
+					icon: (
+						<div className="flex aspect-square h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
+							<GiTwoCoins className="h-6 w-6 text-yellow-400" />
+						</div>
+					),
+				});
+				onClose();
+				setCustomToken("");
+			} catch (error) {
+				setErrorCustomToken(true);
+			}
 		},
 		[customToken, onChangeType],
 	);
@@ -94,7 +99,6 @@ export default function SelectTokenModal({
 											</div>
 
 											<div className="text-right">
-												<p>{token.balance}</p>
 												<p className="flex text-xs">
 													{shortAddress(
 														token.address,

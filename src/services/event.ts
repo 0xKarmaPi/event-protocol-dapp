@@ -1,15 +1,5 @@
 import AXIOS from "@/configs/axios";
-import {
-	ICreateEventRequest,
-	IEvent,
-	IGetEventsRequest,
-	IPagination,
-} from "@/types/event";
-
-export const deployEvent = async (body: ICreateEventRequest) => {
-	const res = await AXIOS.post(`/events`, body);
-	return res.data;
-};
+import { IEvent, IGetEventsRequest, IPagination } from "@/types/event";
 
 export const getEvents = async (
 	query: IGetEventsRequest,

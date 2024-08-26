@@ -12,60 +12,88 @@ import {
 } from "@nextui-org/react";
 import OptionSetup from "./OptionSetup";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import dayjs from "dayjs";
-import { useDeployEventStore } from "@/configs/zustand";
-import { useEffect } from "react";
-import { parseDate, parseDateTime } from "@internationalized/date";
+import { parseDateTime } from "@internationalized/date";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
-import { deployEvent } from "@/services/event";
+import { useDeployEventStore } from "@/stores/deployEventStore";
+import { createPredictionEvent } from "@/services/deploy-prediction-event";
+import { useAnchor } from "@/hooks/useAnchor";
+import dayjs from "dayjs";
+import { BN } from "bn.js";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 type EventInputs = {
 	description: string;
-	endTime: DateValue;
+	endDate: DateValue;
+	startDate: DateValue;
 };
 const LIMIT_DESCRIPTION = 144;
 
 export default function DeployEventForm() {
-	const session = useSession();
-	const { event, updateDeployEvent } = useDeployEventStore();
+	const { program } = useAnchor();
+	const { publicKey: userPublicKey } = useWallet();
+	// const session = useSession();
+
+	const {
+		description,
+		endDate,
+		startDate,
+		leftMint,
+		rightDescription,
+		leftDescription,
+		rightMint,
+	} = useDeployEventStore();
 
 	const mutateDeployEvent = useMutation({
 		mutationKey: ["deployEvent"],
-		mutationFn: deployEvent,
-		onError: () => {},
-		onSuccess: (data) => {},
+		mutationFn: createPredictionEvent,
+		onError: () => {
+			toast("Deploy event failed", { type: "error" });
+		},
+		onSuccess: () => {
+			reset();
+			toast("Deploy event successfully", { type: "success" });
+		},
 	});
 
 	const {
 		register,
 		handleSubmit,
-		setValue,
 		control,
 		formState: { errors },
-	} = useForm<EventInputs>();
-
-	useEffect(() => {
-		if (event) {
-			setValue("description", event?.description);
-			setValue("endTime", parseDateTime(event?.endTime));
-		}
-	}, [event, setValue]);
+		watch,
+		reset,
+	} = useForm<EventInputs>({
+		defaultValues: {
+			description: description!,
+			endDate: parseDateTime(endDate!),
+			startDate: parseDateTime(startDate!),
+		},
+	});
 
 	const onSubmit: SubmitHandler<EventInputs> = (data) => {
-		if (!session.data?.user) {
+		if (!userPublicKey) {
 			toast("Please connect your wallet", { type: "error" });
 			return;
 		}
-		mutateDeployEvent.mutate({
-			description: data.description,
-			endTime: dayjs(data.endTime.toString()).format(
-				"YYYY-MM-DDTHH:mm:ss.SSS[Z]",
-			),
-			options: event?.options,
-		});
+		if (userPublicKey) {
+			mutateDeployEvent.mutate({
+				options: {
+					description: data.description,
+					endDate: new BN(dayjs(data.endDate.toString()).unix()),
+					startDate: new BN(dayjs(data.startDate.toString()).unix()),
+					leftDescription,
+					rightDescription,
+					leftMint,
+					rightMint,
+				},
+				program,
+				userPublicKey,
+			});
+		}
 	};
+	const startDateValue = watch("startDate");
 
 	return (
 		<form
@@ -104,14 +132,37 @@ export default function DeployEventForm() {
 						Options Description
 					</p>
 					<div className="grid w-full grid-cols-1 gap-3 md:grid-cols-2">
-						<OptionSetup optionName="Option A" />
-						<OptionSetup optionName="Option B" />
+						<OptionSetup optionName="Option A" isLeft={true} />
+						<OptionSetup optionName="Option B" isLeft={false} />
 					</div>
 					<div className="mt-6 text-left font-bold">Time setup</div>
-					<div className="z-50 flex w-full items-start gap-2">
+					<div className="z-50 flex w-full items-start gap-3">
 						<Controller
 							control={control}
-							name="endTime"
+							name="startDate"
+							rules={{
+								required: {
+									value: true,
+									message: "Start date is required",
+								},
+							}}
+							render={({ field }) => (
+								<DatePicker
+									granularity="minute"
+									hourCycle={12}
+									value={field.value}
+									onChange={(date) => {
+										field.onChange(date);
+									}}
+									errorMessage={errors?.startDate?.message}
+									isInvalid={!!errors?.startDate}
+									label="Select Start Date"
+								/>
+							)}
+						/>
+						<Controller
+							control={control}
+							name="endDate"
 							rules={{
 								required: {
 									value: true,
@@ -126,9 +177,10 @@ export default function DeployEventForm() {
 									onChange={(date) => {
 										field.onChange(date);
 									}}
-									errorMessage={errors?.endTime?.message}
-									isInvalid={!!errors?.endTime}
+									errorMessage={errors?.endDate?.message}
+									isInvalid={!!errors?.endDate}
 									label="Select End Date"
+									minValue={startDateValue}
 								/>
 							)}
 						/>

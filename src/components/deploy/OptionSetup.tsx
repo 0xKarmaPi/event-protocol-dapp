@@ -8,6 +8,8 @@ import Image from "next/image";
 import { Input, useDisclosure } from "@nextui-org/react";
 import { shortAddress } from "@/utils/common";
 import SelectTokenModal from "./SelectTokenModal";
+import { useDeployEventStore } from "@/stores/deployEventStore";
+import { web3 } from "@coral-xyz/anchor";
 
 export type TokenOption = {
 	name?: string;
@@ -39,13 +41,38 @@ export const TOKENS: TokenOption[] = [
 		balance: 100,
 	},
 ];
-export default function OptionSetup({ optionName }: { optionName: string }) {
+export default function OptionSetup({
+	optionName,
+	isLeft,
+}: {
+	optionName: string;
+	isLeft?: boolean;
+}) {
 	const [type, setType] = useState(TOKENS[0]);
-	const [description, setDescription] = useState("");
 	const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+	const {
+		leftDescription,
+		rightDescription,
+		updateLeftDescription,
+		updateRightDescription,
+		updateLeftMint,
+		updateRightMint,
+	} = useDeployEventStore();
 	const onChangeType = (type: TokenOption) => {
 		setType(type);
+		if (type.value !== "SOL") {
+			if (isLeft) {
+				updateLeftMint(new web3.PublicKey(type.address));
+			} else {
+				updateRightMint(new web3.PublicKey(type.address));
+			}
+		} else {
+			if (isLeft) {
+				updateLeftMint(null);
+			} else {
+				updateRightMint(null);
+			}
+		}
 	};
 	return (
 		<>
@@ -73,9 +100,10 @@ export default function OptionSetup({ optionName }: { optionName: string }) {
 				<Input
 					type="text"
 					label="Description"
-					value={description}
+					value={isLeft ? leftDescription : rightDescription}
 					onChange={(e: any) => {
-						setDescription(e.target.value);
+						if (isLeft) updateLeftDescription(e.target.value);
+						else updateRightDescription(e.target.value);
 					}}
 				/>
 			</div>

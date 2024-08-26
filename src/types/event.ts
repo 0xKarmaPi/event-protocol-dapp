@@ -1,16 +1,28 @@
+import { web3 } from "@coral-xyz/anchor";
+
 export interface IEvent {
 	id?: string;
 	userId?: string;
 	description: string;
 	createdAt?: string;
-	author?: {
-		username: string;
-		address: string;
-	};
 	address?: string;
-	endTime: string;
-	options: IEventOption[];
+	endDate?: string;
+	startDate?: string;
+	leftMint: web3.PublicKey | null;
+	rightMint: web3.PublicKey | null;
+	burning?: boolean;
 	result?: "WIN" | "LOSE";
+	left_description: string;
+	left_mint: string;
+	right_description: string;
+	right_mint: string;
+	pubkey: string;
+	creator: string;
+	deleted: boolean;
+	end_date: string;
+	start_date: string;
+	left_amount?: number;
+	right_amount?: number;
 }
 
 export interface IEventOption {
@@ -40,10 +52,11 @@ export interface IOptionCreateEvent {
 export interface IGetEventsRequest {
 	page: number;
 	limit: number;
+	creator?: string;
 }
 
 export interface IPagination<T> {
-	list: T[];
-	maxPage: number;
+	nodes: T[];
+	page: number;
 	total: number;
 }
