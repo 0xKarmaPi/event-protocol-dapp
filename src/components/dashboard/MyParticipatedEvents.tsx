@@ -14,83 +14,19 @@ import dayjs from "dayjs";
 const rows: IEvent[] = [
 	{
 		description: "Real Madrid win the UEFA Super cup 2024?",
-		endDate: "2025-01-01T00:00:00.000Z",
 		id: "1",
-		options: [
-			{
-				description: "Option 1",
-				id: "1",
-				token: "CUSTOM",
-				address: "0x123",
-				selected: true,
-				amount: 200,
-			},
-			{
-				description: "Option 2",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-			},
-		],
+		creator: "",
+		deleted: false,
+		end_date: "2025-01-01T00:00:00.000Z",
+		start_date: "2025-01-01T00:00:00.000Z",
+		left_mint: "0x123",
+		right_mint: "0x123",
+		left_description: "Option 1",
+		right_description: "Option 2",
+		pubkey: "0x123",
 		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
-	},
-	{
-		description: "Real Madrid win the UEFA Super cup 2024?",
-		endDate: "2022-01-01T00:00:00.000Z",
-		id: "2",
-		options: [
-			{
-				description: "Yes",
-				id: "1",
-				token: "RAY",
-				address: "0x123",
-				selected: true,
-				amount: 1000,
-			},
-			{
-				description: "No",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-			},
-		],
-		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
-		result: "WIN",
-	},
-	{
-		description: "Will China Win?",
-		endDate: "2022-01-01T00:00:00.000Z",
-		id: "3",
-		options: [
-			{
-				description: "Yes",
-				id: "1",
-				token: "RAY",
-				address: "0x123",
-			},
-			{
-				description: "No",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-				selected: true,
-				amount: 200,
-			},
-		],
-		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
-		result: "LOSE",
+		leftMint: null,
+		rightMint: null,
 	},
 ];
 export default function MyParticipatedEvents() {
@@ -130,24 +66,28 @@ export default function MyParticipatedEvents() {
 			case "options":
 				return (
 					<div className="flex min-w-[200px] justify-center gap-4">
-						{event?.options?.map((option) => (
-							<div
-								key={option.id}
-								className={clsx(
-									{
-										"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
-											option.selected,
-										"opacity-40": !option.selected,
-									},
-									"min-w-[100px] px-2 py-1",
-								)}
-							>
-								<p>{option.description}</p>
-								<p className="text-xs">
-									{option.amount} {option.token}
-								</p>
-							</div>
-						))}
+						<div
+							className={clsx(
+								{
+									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
+										true,
+								},
+								"min-w-[100px] px-2 py-1",
+							)}
+						>
+							<p>{event.left_description}</p>
+						</div>
+						<div
+							className={clsx(
+								{
+									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
+										true,
+								},
+								"min-w-[100px] px-2 py-1",
+							)}
+						>
+							<p>{event.right_description}</p>
+						</div>
 					</div>
 				);
 

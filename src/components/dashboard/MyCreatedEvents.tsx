@@ -25,75 +25,19 @@ import {
 const rows: IEvent[] = [
 	{
 		description: "Real Madrid win the UEFA Super cup 2024?",
-		endDate: "2025-01-01T00:00:00.000Z",
 		id: "1",
-		options: [
-			{
-				description: "Option 1",
-				id: "1",
-				token: "CUSTOM",
-				address: "0x123",
-			},
-			{
-				description: "Option 2",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-			},
-		],
+		creator: "",
+		deleted: false,
+		end_date: "2025-01-01T00:00:00.000Z",
+		start_date: "2025-01-01T00:00:00.000Z",
+		left_mint: "0x123",
+		right_mint: "0x123",
+		left_description: "Option 1",
+		right_description: "Option 2",
+		pubkey: "0x123",
 		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
-	},
-	{
-		description: "Real Madrid win the UEFA Super cup 2024?",
-		endDate: "2022-01-01T00:00:00.000Z",
-		id: "2",
-		options: [
-			{
-				description: "Yes",
-				id: "1",
-				token: "RAY",
-				address: "0x123",
-			},
-			{
-				description: "No",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-			},
-		],
-		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
-	},
-	{
-		description: "Will China Win?",
-		endDate: "2022-01-01T00:00:00.000Z",
-		id: "3",
-		options: [
-			{
-				description: "Yes",
-				id: "1",
-				token: "RAY",
-				address: "0x123",
-			},
-			{
-				description: "No",
-				id: "2",
-				token: "SOL",
-				address: "0x123",
-			},
-		],
-		address: "0x123",
-		author: {
-			address: "0x123",
-			username: "User 1",
-		},
+		leftMint: null,
+		rightMint: null,
 	},
 ];
 export default function MyCreatedEvents() {
@@ -133,14 +77,16 @@ export default function MyCreatedEvents() {
 			case "options":
 				return (
 					<div className="flex min-w-[200px] justify-center gap-4">
-						{event?.options?.map((option) => (
-							<div key={option.id}>
-								<p>{option.description}</p>
-								<p className="text-xs">
-									Accept: {option.token}
-								</p>
-							</div>
-						))}
+						<div>
+							<p>{event.left_description}</p>
+							<p className="text-xs">Accept: {event.left_mint}</p>
+						</div>
+						<div>
+							<p>{event.right_description}</p>
+							<p className="text-xs">
+								Accept: {event.right_mint}
+							</p>
+						</div>
 					</div>
 				);
 
