@@ -11,7 +11,7 @@ import {
 	Skeleton,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import cx from "clsx";
@@ -20,6 +20,13 @@ import jup from "/public/assets/jupiter.png";
 import raydium from "/public/assets/raydium.webp";
 import { GiTwoCoins } from "react-icons/gi";
 import { IEvent } from "@/types/event";
+import { useMutation } from "@tanstack/react-query";
+import { makeAVoteTransaction } from "@/services/make-a-vote";
+import { web3 } from "@coral-xyz/anchor";
+import { useAnchor } from "@/hooks/useAnchor";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { TICKET_SEEDS_PREFIX } from "@/utils/constants";
+import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 
 const TOKEN_ICONS = {
 	SOL: <Image src={sol} alt="Solana" width={24} height={24} />,
@@ -38,15 +45,114 @@ export default function EventDetailForm({
 	isError: boolean;
 }) {
 	const [selectedOption, setSelectedOption] = useState<number | undefined>();
+	const [amount, setAmount] = useState<string>("0");
+	const [balanceTokenVote, setBalanceTokenVote] = useState(0);
 
-	const handleClickSubmit = useCallback(() => {
-		if (selectedOption === 0 || selectedOption === 1) {
-			toast("Submitted successfully", { type: "success" });
-		} else {
+	const { program } = useAnchor();
+	const { publicKey } = useWallet();
+
+	const mutateMakeAVote = useMutation({
+		mutationFn: makeAVoteTransaction,
+		mutationKey: ["makeAVote"],
+		onSuccess: (res) => {
+			toast("Voted successfully", { type: "success" });
+			setAmount("0");
+			setSelectedOption(undefined);
+		},
+		onError: () => {
+			toast("Failed to vote", { type: "error" });
+		},
+	});
+	const fetchTokenBalance = useCallback(async () => {
+		// Default is SOL balance
+		let balance = await program.provider.connection.getBalance(publicKey!);
+
+		try {
+			let mintAddress;
+			switch (selectedOption) {
+				case 0:
+					mintAddress = event?.left_mint;
+					break;
+
+				case 1:
+					mintAddress = event?.right_mint;
+					break;
+			}
+
+			if (mintAddress) {
+				const associatedToken = await getAssociatedTokenAddress(
+					new web3.PublicKey(mintAddress),
+					publicKey!,
+				);
+
+				const account = await getAccount(
+					program.provider.connection,
+					associatedToken,
+				);
+				balance = Number(account.amount) / web3.LAMPORTS_PER_SOL;
+				setBalanceTokenVote(balance);
+			} else {
+				setBalanceTokenVote(balance / web3.LAMPORTS_PER_SOL);
+			}
+		} catch (error) {
+			console.log(error);
+			setBalanceTokenVote(0);
+		}
+	}, [
+		event?.pubkey,
+		program.account.predictionEvent,
+		program.account.ticket,
+		program.programId,
+		program.provider.connection,
+		publicKey,
+		selectedOption,
+	]);
+
+	const handleClickSubmit = useCallback(async () => {
+		if (!publicKey) {
+			toast("Please connect your wallet", { type: "error" });
+			return;
+		}
+		if (selectedOption !== 0 && selectedOption !== 1) {
 			toast("Please select an option", { type: "error" });
 			return;
 		}
+		if (!amount || Number(amount) <= 0) {
+			toast("Please enter an amount", { type: "error" });
+			return;
+		}
+		if (Number(amount) > balanceTokenVote) {
+			toast("Your balance is not enough", { type: "error" });
+			return;
+		}
+
+		mutateMakeAVote.mutate({
+			amount: Number(amount),
+			event: new web3.PublicKey(event?.pubkey || ""),
+			program,
+			selection: selectedOption === 0 ? "left" : "right",
+			signer: publicKey,
+		});
+	}, [
+		amount,
+		event?.pubkey,
+		mutateMakeAVote,
+		program,
+		publicKey,
+		selectedOption,
+	]);
+	const renderBalanceUnit = useMemo(() => {
+		if (selectedOption === 0) {
+			return event?.left_mint ? shortAddress(event?.left_mint) : "SOL";
+		}
+		if (selectedOption === 1) {
+			return event?.right_mint ? shortAddress(event?.right_mint) : "SOL";
+		}
+		return "SOL";
 	}, [selectedOption]);
+	useEffect(() => {
+		if (publicKey && event) fetchTokenBalance();
+	}, [publicKey, event, selectedOption]);
 
 	if (isPending) {
 		return (
@@ -187,35 +293,27 @@ export default function EventDetailForm({
 				<div className="mt-4 flex justify-between">
 					<p>Vote amount</p>
 
-					<p className="flex items-center gap-2 text-right">
-						Balance: 500{" "}
-						<Image
-							src="/assets/solana.png"
-							width={24}
-							height={24}
-							alt="SOl"
-						/>{" "}
-						SOL
+					<p className="flex items-center gap-2 text-right text-green-500">
+						Your Balance: {balanceTokenVote.toLocaleString()}{" "}
+						{renderBalanceUnit}
 					</p>
 				</div>
 
 				<div>
 					<Input
-						// startContent={
-						// 	TOKEN_ICONS[
-						// 		event?.options?.[selectedOption ?? 0]
-						// 			.token as keyof typeof TOKEN_ICONS
-						// 	]
-						// }
-						// endContent={event?.options[selectedOption ?? 0].token}
+						endContent={renderBalanceUnit}
 						type="number"
 						placeholder="0"
 						min={0}
+						max={balanceTokenVote}
 						labelPlacement="outside"
+						value={amount}
+						onChange={(e) => setAmount(e.target.value)}
 					/>
 				</div>
 
 				<Button
+					isLoading={mutateMakeAVote.isPending}
 					className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 					fullWidth
 					onClick={handleClickSubmit}

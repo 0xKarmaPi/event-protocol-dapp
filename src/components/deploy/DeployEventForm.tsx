@@ -48,7 +48,9 @@ export default function DeployEventForm() {
 	const mutateDeployEvent = useMutation({
 		mutationKey: ["deployEvent"],
 		mutationFn: createPredictionEvent,
-		onError: () => {
+		onError: (error) => {
+			console.log(error);
+
 			toast("Deploy event failed", { type: "error" });
 		},
 		onSuccess: () => {

@@ -1,7 +1,7 @@
 export function shortAddress(
 	address: string | null | undefined,
-	start = 6,
-	end = 4,
+	start = 4,
+	end = 3,
 ): string {
 	try {
 		if (!address) {

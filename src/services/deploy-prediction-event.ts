@@ -1,7 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import { web3 } from "@coral-xyz/anchor";
-import { BN } from "bn.js";
 import {
 	PREDICTION_EVENT_SEEDS_PREFIX,
 	SIDE,
