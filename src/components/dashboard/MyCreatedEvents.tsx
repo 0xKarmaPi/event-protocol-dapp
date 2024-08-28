@@ -1,4 +1,7 @@
+import { getEvents } from "@/services/event";
 import { IEvent } from "@/types/event";
+import { shortAddress } from "@/utils/common";
+import { PAGE_SIZE_DEFAULT } from "@/utils/constants";
 import {
 	Table,
 	TableHeader,
@@ -7,40 +10,22 @@ import {
 	TableRow,
 	TableCell,
 	getKeyValue,
-	Dropdown,
+	Pagination,
+	Chip,
 	Button,
-	DropdownItem,
-	DropdownMenu,
-	DropdownTrigger,
 } from "@nextui-org/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import dayjs from "dayjs";
-import {
-	FiDelete,
-	FiEdit,
-	FiEdit2,
-	FiMoreVertical,
-	FiTrash2,
-} from "react-icons/fi";
+import { useState } from "react";
+import SetPredictionResultModal from "./SetPredictionResultModal";
+import { AiFillDelete } from "react-icons/ai";
 
-const rows: IEvent[] = [
-	{
-		description: "Real Madrid win the UEFA Super cup 2024?",
-		id: "1",
-		creator: "",
-		deleted: false,
-		end_date: "2025-01-01T00:00:00.000Z",
-		start_date: "2025-01-01T00:00:00.000Z",
-		left_mint: "0x123",
-		right_mint: "0x123",
-		left_description: "Option 1",
-		right_description: "Option 2",
-		pubkey: "0x123",
-		address: "0x123",
-		leftMint: null,
-		rightMint: null,
-	},
-];
 export default function MyCreatedEvents() {
+	const { publicKey } = useWallet();
+	const [page, setPage] = useState(1);
+
 	const columns = [
 		{
 			key: "index",
@@ -59,80 +44,170 @@ export default function MyCreatedEvents() {
 		{
 			key: "status",
 			label: "STATUS",
-			align: "end",
+			align: "center",
 		},
 		{
 			key: "action",
-			label: "ACTION",
-			align: "end",
+			label: "ACTION / RESULT",
+			align: "center",
 		},
 	];
 
-	const renderCellValue = (event: IEvent, columnKey: string) => {
+	const renderMintValue = (mint?: string) => {
+		if (!mint) return "SOL";
+		return shortAddress(mint);
+	};
+	const renderStatusLabel = (event: IEvent) => {
+		const now = dayjs();
+		const startDate = dayjs(event.start_date);
+		const endDate = dayjs(event.end_date);
+
+		if (now.isBefore(startDate)) {
+			return (
+				<div className="text-gray-400">
+					<Chip color="default">Upcomming</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format(
+							"DD MMM YYYY - HH:mm A",
+						)}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		if (now.isAfter(endDate)) {
+			return (
+				<div className="text-red-500">
+					<Chip color="danger" variant="flat">
+						Ended
+					</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format(
+							"DD MMM YYYY - HH:mm A",
+						)}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		return (
+			<div className="text-green-500">
+				<Chip color="success">On going</Chip>
+				<p>
+					From:{" "}
+					{dayjs(event.start_date).format("DD MMM YYYY - HH:mm A")}
+				</p>
+				<p>
+					To: {dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
+				</p>
+			</div>
+		);
+	};
+
+	const renderCellValue = (
+		event: IEvent,
+		columnKey: string,
+		index: number,
+	) => {
 		switch (columnKey) {
 			case "index":
-				return event.id;
+				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
 			case "description":
-				return <p className="w-[300px]">{event.description}</p>;
+				return <p className="w-[200px]">{event.description}</p>;
 			case "options":
 				return (
-					<div className="flex min-w-[200px] justify-center gap-4">
-						<div>
+					<div className="flex justify-center gap-2">
+						<div
+							className={clsx(
+								{
+									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
+										true,
+								},
+								"w-[150px] px-2 py-1",
+							)}
+						>
 							<p>{event.left_description}</p>
-							<p className="text-xs">Accept: {event.left_mint}</p>
+							<p className="text-xs">
+								Accept: {renderMintValue(event.left_mint)}
+							</p>
 						</div>
-						<div>
+						<div
+							className={clsx(
+								{
+									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
+										true,
+								},
+								"w-[150px] px-2 py-1",
+							)}
+						>
 							<p>{event.right_description}</p>
 							<p className="text-xs">
-								Accept: {event.right_mint}
+								Accept: {renderMintValue(event.right_mint)}
 							</p>
 						</div>
 					</div>
 				);
 
 			case "status":
-				if (dayjs(event.endDate).isBefore(Date.now()))
-					return (
-						<div className="w-[200px] text-right text-red-500">
-							<p>Ended</p>
-							{dayjs(event.endDate).format(
-								"DD/MM/YYYY - HH:mm:ss A",
-							)}
-						</div>
-					);
 				return (
-					<div className="w-[200px] text-right text-green-500">
-						<p>Ongoing</p>
-						{dayjs(event.endDate).format("DD/MM/YYYY - HH:mm:ss A")}
+					<div className="w-[200px] text-right">
+						{renderStatusLabel(event)}
 					</div>
 				);
 			case "action":
-				return (
-					<Dropdown className="text-white">
-						<DropdownTrigger>
-							<Button isIconOnly size="sm" variant="light">
-								<FiMoreVertical />
-							</Button>
-						</DropdownTrigger>
-						<DropdownMenu>
-							<DropdownItem startContent={<FiEdit />}>
-								Edit
-							</DropdownItem>
-							<DropdownItem
-								className="text-danger"
-								startContent={<FiTrash2 />}
-							>
-								Delete
-							</DropdownItem>
-						</DropdownMenu>
-					</Dropdown>
-				);
+				if (dayjs(event.start_date).isAfter(Date.now()))
+					return (
+						<Button
+							color="danger"
+							variant="flat"
+							startContent={<AiFillDelete />}
+						>
+							Delete{" "}
+						</Button>
+					);
+				if (dayjs(event.end_date).isBefore(Date.now()))
+					return <SetPredictionResultModal event={event} />;
+				return <></>;
 			default:
 				return getKeyValue(event, columnKey);
 		}
 	};
+	const { data: createdEvents } = useQuery({
+		queryKey: ["createdEvents", page, publicKey],
+		queryFn: () =>
+			getEvents({
+				page: page,
+				limit: PAGE_SIZE_DEFAULT,
+				creator: publicKey?.toString(),
+			}),
+		enabled: !!publicKey,
+	});
 	return (
-		<Table aria-label="Example table with dynamic content">
+		<Table
+			bottomContent={
+				<div className="flex w-full justify-center">
+					<Pagination
+						isCompact
+						showControls
+						showShadow
+						page={page}
+						total={Math.ceil(
+							(createdEvents?.total ?? 0) / PAGE_SIZE_DEFAULT,
+						)}
+						onChange={(page) => setPage(page)}
+					/>
+				</div>
+			}
+			aria-label="Example table with dynamic content"
+		>
 			<TableHeader columns={columns}>
 				{(column) => (
 					<TableColumn align={column.align! as any} key={column.key}>
@@ -140,16 +215,23 @@ export default function MyCreatedEvents() {
 					</TableColumn>
 				)}
 			</TableHeader>
-			<TableBody items={rows} emptyContent={"No rows to display."}>
-				{(item) => (
+			<TableBody
+				items={createdEvents?.nodes || []}
+				emptyContent={"No rows to display."}
+			>
+				{(createdEvents?.nodes ?? [])?.map((item, index) => (
 					<TableRow key={item.id}>
 						{(columnKey) => (
 							<TableCell>
-								{renderCellValue(item, columnKey.toString())}
+								{renderCellValue(
+									item,
+									columnKey.toString(),
+									index,
+								)}
 							</TableCell>
 						)}
 					</TableRow>
-				)}
+				))}
 			</TableBody>
 		</Table>
 	);

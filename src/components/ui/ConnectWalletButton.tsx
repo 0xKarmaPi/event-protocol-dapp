@@ -17,16 +17,17 @@ import sol from "/public/assets/solana.png";
 import phantom from "/public/assets/phantom-icon.png";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { FiLogOut, FiUser } from "react-icons/fi";
-import { deleteCookie, setCookie } from "cookies-next";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
 import { COOKIES } from "@/utils/constants";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export default function ConnectWalletButton() {
 	const session = useSession();
 	const router = useRouter();
 	const { signMessage, publicKey, connected, disconnect } = useWallet();
+	const modalSellectWallet = useWalletModal();
 
 	const mutateSignIn = useMutation({
 		mutationFn: signInService,
@@ -36,9 +37,9 @@ export default function ConnectWalletButton() {
 				username: publicKey?.toString()!,
 				address: publicKey?.toString()!,
 				id: publicKey?.toString()!,
-				redirect: false,
+				redirect: true,
 			});
-			setCookie(COOKIES.ACCESSTOKEN, data.accessToken);
+			setCookie(COOKIES.ACCESSTOKEN, data.access_token);
 			toast("Connected successfully", { type: "success" });
 		},
 		onError: () => {
@@ -67,7 +68,7 @@ export default function ConnectWalletButton() {
 
 	const handleDisconnect = useCallback(() => {
 		disconnect();
-		// signOut({ callbackUrl: "/" });
+		signOut();
 		deleteCookie(COOKIES.ACCESSTOKEN);
 	}, [disconnect]);
 
@@ -75,14 +76,21 @@ export default function ConnectWalletButton() {
 		router.push("/profile");
 	};
 
-	// useEffect(() => {
-	// 	console.log(session?.data?.user?.email, publicKey?.toString());
-	// 	if (connected && session?.data?.user?.email === undefined) {
-	// 		mutateGeneratePayload.mutate(publicKey?.toString()!);
-	// 	}
-	// }, [connected]);
+	const handleClickConnectWallet = async () => {
+		modalSellectWallet.setVisible(true);
+	};
+	useEffect(() => {
+		if (publicKey && connected) {
+			const accessToken = getCookie(COOKIES.ACCESSTOKEN);
 
-	if (connected) {
+			if (!accessToken) {
+				mutateGeneratePayload.mutate(publicKey.toString());
+			}
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [publicKey, connected]);
+
+	if (session.data?.user) {
 		return (
 			<Dropdown className="text-white">
 				<DropdownTrigger>
@@ -131,5 +139,15 @@ export default function ConnectWalletButton() {
 		);
 	}
 
-	return <WalletMultiButton />;
+	return (
+		<Button
+			isLoading={
+				mutateGeneratePayload.isPending || mutateSignIn.isPending
+			}
+			onClick={handleClickConnectWallet}
+			className="bg-gradient-to-tr from-primary to-purple-400 text-white"
+		>
+			Connect Wallet
+		</Button>
+	);
 }

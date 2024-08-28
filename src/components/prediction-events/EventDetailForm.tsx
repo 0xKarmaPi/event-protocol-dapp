@@ -95,14 +95,11 @@ export default function EventDetailForm({
 				setBalanceTokenVote(balance / web3.LAMPORTS_PER_SOL);
 			}
 		} catch (error) {
-			console.log(error);
 			setBalanceTokenVote(0);
 		}
 	}, [
-		event?.pubkey,
-		program.account.predictionEvent,
-		program.account.ticket,
-		program.programId,
+		event?.left_mint,
+		event?.right_mint,
 		program.provider.connection,
 		publicKey,
 		selectedOption,
@@ -135,6 +132,7 @@ export default function EventDetailForm({
 		});
 	}, [
 		amount,
+		balanceTokenVote,
 		event?.pubkey,
 		mutateMakeAVote,
 		program,
@@ -149,9 +147,11 @@ export default function EventDetailForm({
 			return event?.right_mint ? shortAddress(event?.right_mint) : "SOL";
 		}
 		return "SOL";
-	}, [selectedOption]);
+	}, [event?.left_mint, event?.right_mint, selectedOption]);
+
 	useEffect(() => {
 		if (publicKey && event) fetchTokenBalance();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [publicKey, event, selectedOption]);
 
 	if (isPending) {

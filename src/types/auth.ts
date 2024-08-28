@@ -7,6 +7,6 @@ export interface IAuthRequest {
 }
 
 export interface IAuthResponse {
-	accessToken: string;
-	user: IUser;
+	access_token: string;
+	// user: IUser;
 }
