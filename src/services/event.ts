@@ -11,6 +11,6 @@ export const getEvents = async (
 };
 
 export const getEvent = async (id: string): Promise<IEvent> => {
-	const res = await AXIOS.get(`/event/${id}`);
+	const res = await AXIOS.get(`/events/${id}`);
 	return res.data;
 };
