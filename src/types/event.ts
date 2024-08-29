@@ -23,6 +23,21 @@ export interface IEvent {
 	start_date: string;
 	left_amount?: number;
 	right_amount?: number;
+	tickets?: Array<EventTicket>;
+	left_decimal?: number;
+	right_decimal?: number;
+}
+
+export interface EventTicket {
+	amount: string;
+	claimed: boolean;
+	created_date: string;
+	creator: string;
+	event_pubkey: string;
+	pubkey: string;
+	result: "Lost" | "Pending" | "Won";
+	selection: "Left" | "Right";
+	withdrawn: boolean;
 }
 
 export interface IEventOption {
@@ -53,6 +68,7 @@ export interface IGetEventsRequest {
 	page: number;
 	limit: number;
 	creator?: string;
+	predictor?: string;
 }
 
 export interface IPagination<T> {

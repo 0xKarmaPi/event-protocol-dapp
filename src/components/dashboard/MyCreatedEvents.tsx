@@ -22,6 +22,7 @@ import { useState } from "react";
 import SetPredictionResultModal from "./SetPredictionResultModal";
 import { AiFillDelete } from "react-icons/ai";
 import TooltipCorrectOption from "./TooltipCorrectOption";
+import ButtonDeleteEvent from "./ButtonDeleteEvent";
 
 export default function MyCreatedEvents() {
 	const { publicKey } = useWallet();
@@ -124,7 +125,18 @@ export default function MyCreatedEvents() {
 			case "index":
 				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
 			case "description":
-				return <p className="w-[200px]">{event.description}</p>;
+				return (
+					<p className="w-[200px]">
+						{event.description}
+						<br />
+						{event.burning && (
+							<span className="text-xs italic text-danger">
+								(*)All token will be burned if player predict
+								wrong
+							</span>
+						)}
+					</p>
+				);
 			case "options":
 				return (
 					<div className="flex justify-center gap-2">
@@ -181,13 +193,7 @@ export default function MyCreatedEvents() {
 					);
 				if (dayjs(event.start_date).isAfter(Date.now()))
 					return (
-						<Button
-							color="danger"
-							variant="flat"
-							startContent={<AiFillDelete />}
-						>
-							Delete
-						</Button>
+						<ButtonDeleteEvent event={event} refetch={refetch} />
 					);
 				if (dayjs(event.end_date).isBefore(Date.now()))
 					return (

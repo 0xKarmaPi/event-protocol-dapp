@@ -2,13 +2,11 @@ import BorderGradient from "@/components/ui/BorderGradient";
 import { Button } from "@nextui-org/react";
 import Image from "next/image";
 import Link from "next/link";
-import { GiTwoCoins } from "react-icons/gi";
 import sol from "/public/assets/solana.png";
 import eventTokenLogo from "/public/assets/logo.png";
 import { useAnchor } from "@/hooks/useAnchor";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { web3 } from "@coral-xyz/anchor";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 import { formatPrice } from "@/utils/common";
 import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
@@ -23,7 +21,9 @@ export default function MyBalance() {
 
 	useEffect(() => {
 		fetchBalance().then((balance) => setMyBalance(balance));
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
 	const fetchBalance = useCallback(async () => {
 		const solBalance = await program.provider.connection.getBalance(
 			program.provider.publicKey!,
@@ -42,7 +42,6 @@ export default function MyBalance() {
 			associatedToken,
 		);
 		const eventTokenBalance = Number(account.amount) / EVENT_TOKEN_DECIMAL;
-		console.log(account);
 
 		return {
 			sol: solBalance / web3.LAMPORTS_PER_SOL,

@@ -1,5 +1,5 @@
 import { IEvent } from "@/types/event";
-import { shortAddress } from "@/utils/common";
+import { renderMintValue, shortAddress } from "@/utils/common";
 import {
 	Button,
 	Modal,
@@ -33,10 +33,6 @@ export default function SetPredictionResultModal({
 	const { publicKey } = useWallet();
 
 	const { isOpen, onOpen, onOpenChange } = useDisclosure();
-	const renderMintValue = (mint?: string) => {
-		if (!mint) return "SOL";
-		return shortAddress(mint);
-	};
 
 	const mutateSetResultEvent = useMutation({
 		mutationFn: finishEvent,

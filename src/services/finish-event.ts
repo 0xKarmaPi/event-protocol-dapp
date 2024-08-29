@@ -43,8 +43,6 @@ export const finishEvent = async ({
 		program.programId,
 	);
 
-	console.log(await program.provider.connection.getAccountInfo(rightPool));
-
 	let creatorLeftBeneficiaryAta = null;
 	let creatorRightBeneficiaryAta = null;
 	let systemRightFee = null;
@@ -57,7 +55,18 @@ export const finishEvent = async ({
 			[TOKENS_SYSTEM_FEE_SEEDS_PREFIX, rightMint.toBuffer()],
 			program.programId,
 		)[0];
-
+		transaction.add(
+			await program.methods
+				.createSystemFeeTokenAccount()
+				.accountsStrict({
+					mint: rightMint,
+					signer: signer,
+					systemFee: systemRightFee,
+					systemProgram: web3.SystemProgram.programId,
+					tokenProgram: spl.TOKEN_PROGRAM_ID,
+				})
+				.instruction(),
+		);
 		creatorRightBeneficiaryAta = await addCreateAtaInsIfNotExist(
 			transaction,
 			program.provider.connection,
@@ -71,7 +80,18 @@ export const finishEvent = async ({
 			[TOKENS_SYSTEM_FEE_SEEDS_PREFIX, leftMint.toBuffer()],
 			program.programId,
 		)[0];
-
+		transaction.add(
+			await program.methods
+				.createSystemFeeTokenAccount()
+				.accountsStrict({
+					mint: leftMint,
+					signer: signer,
+					systemFee: systemLeftFee,
+					systemProgram: web3.SystemProgram.programId,
+					tokenProgram: spl.TOKEN_PROGRAM_ID,
+				})
+				.instruction(),
+		);
 		creatorLeftBeneficiaryAta = await addCreateAtaInsIfNotExist(
 			transaction,
 			program.provider.connection,
@@ -81,18 +101,6 @@ export const finishEvent = async ({
 		);
 		leftPoolValue = leftPool;
 	}
-
-	console.log("finish event", {
-		leftMint,
-		creatorLeftBeneficiaryAta,
-		systemLeftFee,
-		leftPool: leftPoolValue,
-
-		rightMint,
-		creatorRightBeneficiaryAta,
-		systemRightFee,
-		rightPool: rightPoolValue,
-	});
 
 	const finishEventInstruction = await program.methods
 		.finishEvent(optionCorrect === "left" ? SIDE.Left : SIDE.Right)

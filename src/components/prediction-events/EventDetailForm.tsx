@@ -165,6 +165,12 @@ export default function EventDetailForm({
 		return now.isAfter(endDate);
 	}, [event]);
 
+	const isEventUpcomming = useMemo(() => {
+		const now = dayjs();
+		const startDate = dayjs(event?.start_date);
+		return now.isBefore(startDate);
+	}, [event]);
+
 	useEffect(() => {
 		if (publicKey && event) fetchTokenBalance();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,9 +295,8 @@ export default function EventDetailForm({
 						</div>
 
 						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
-							Vote amount:
+							Accept:
 							<div className="flex">
-								{event.left_amount ?? 0}{" "}
 								{renderMintValue(event.left_mint)}
 							</div>
 						</div>
@@ -303,9 +308,8 @@ export default function EventDetailForm({
 						</div>
 
 						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
-							Vote amount:
+							Accept:
 							<div className="flex">
-								{event.right_amount ?? 0}{" "}
 								{renderMintValue(event.right_mint)}
 							</div>
 						</div>
@@ -360,13 +364,22 @@ export default function EventDetailForm({
 				</div>
 
 				<Button
-					isDisabled={!selectedOption || !amount || isEventEnded}
+					isDisabled={
+						!selectedOption ||
+						!amount ||
+						isEventEnded ||
+						isEventUpcomming
+					}
 					isLoading={mutateMakeAVote.isPending}
 					className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 					fullWidth
 					onClick={handleClickSubmit}
 				>
-					{isEventEnded ? "The event has ended" : "Submit Predict"}
+					{isEventEnded
+						? "The event has ended"
+						: isEventUpcomming
+							? "The event has not started yet"
+							: "Submit Predict"}
 				</Button>
 			</CardBody>
 			<Divider />

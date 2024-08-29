@@ -1,4 +1,6 @@
+import { getEvents } from "@/services/event";
 import { IEvent } from "@/types/event";
+import { PAGE_SIZE_DEFAULT } from "@/utils/constants";
 import {
 	Table,
 	TableHeader,
@@ -7,29 +9,24 @@ import {
 	TableRow,
 	TableCell,
 	getKeyValue,
+	Chip,
+	Pagination,
+	Button,
 } from "@nextui-org/react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import { useState } from "react";
+import ButtonClaimReward from "./ButtonClaimReward";
+import { renderMintValue } from "@/utils/common";
+import TooltipCorrectOption from "./TooltipCorrectOption";
+import { web3 } from "@coral-xyz/anchor";
 
-const rows: IEvent[] = [
-	{
-		description: "Real Madrid win the UEFA Super cup 2024?",
-		id: "1",
-		creator: "",
-		deleted: false,
-		end_date: "2025-01-01T00:00:00.000Z",
-		start_date: "2025-01-01T00:00:00.000Z",
-		left_mint: "0x123",
-		right_mint: "0x123",
-		left_description: "Option 1",
-		right_description: "Option 2",
-		pubkey: "0x123",
-		address: "0x123",
-		leftMint: null,
-		rightMint: null,
-	},
-];
 export default function MyParticipatedEvents() {
+	const [page, setPage] = useState(1);
+	const { publicKey } = useWallet();
+
 	const columns = [
 		{
 			key: "index",
@@ -39,91 +36,198 @@ export default function MyParticipatedEvents() {
 			key: "description",
 			label: "DESCRIPTION",
 		},
-
 		{
 			key: "options",
-			label: "OPTIONS",
+			label: "OPTIONS & YOUR VOTE",
 			align: "center",
 		},
 		{
 			key: "status",
 			label: "STATUS",
-			align: "end",
+			align: "center",
 		},
 		{
 			key: "result",
-			label: "RESULT",
+			label: "ACTION / RESULT",
 			align: "center",
 		},
 	];
 
-	const renderCellValue = (event: IEvent, columnKey: string) => {
+	const { data: participatedEvents, refetch } = useQuery({
+		queryKey: ["participatedEvents", page, publicKey],
+		queryFn: () =>
+			getEvents({
+				page: page,
+				limit: PAGE_SIZE_DEFAULT,
+				predictor: publicKey?.toString(),
+			}),
+		enabled: !!publicKey,
+	});
+
+	const renderStatusLabel = (event: IEvent) => {
+		const now = dayjs();
+		const startDate = dayjs(event.start_date);
+		const endDate = dayjs(event.end_date);
+
+		if (now.isBefore(startDate)) {
+			return (
+				<div className="text-gray-400">
+					<Chip color="default">Upcomming</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format(
+							"DD MMM YYYY - HH:mm A",
+						)}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		if (now.isAfter(endDate)) {
+			return (
+				<div className="text-red-500">
+					<Chip color="danger" variant="flat">
+						Ended
+					</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		return (
+			<div className="text-green-500">
+				<Chip color="success">On going</Chip>
+				<p>
+					From:{" "}
+					{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+				</p>
+				<p>To: {dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}</p>
+			</div>
+		);
+	};
+
+	const renderCellValue = (
+		event: IEvent,
+		columnKey: string,
+		index: number,
+	) => {
 		switch (columnKey) {
 			case "index":
-				return event.id;
+				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
 			case "description":
-				return <p className="w-[300px]">{event.description}</p>;
+				return (
+					<p className="w-[200px]">
+						{event.description}
+						<br />
+						{event.burning && (
+							<span className="text-xs italic text-danger">
+								(*)All token will be burned if you predict wrong
+							</span>
+						)}
+					</p>
+				);
 			case "options":
 				return (
-					<div className="flex min-w-[200px] justify-center gap-4">
+					<div className="flex justify-center gap-2">
 						<div
 							className={clsx(
 								{
 									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
-										true,
+										event.result !== "Right",
 								},
-								"min-w-[100px] px-2 py-1",
+								"relative w-[150px] px-2 py-1",
 							)}
 						>
 							<p>{event.left_description}</p>
+							<p className="text-sm">
+								Voted:{" "}
+								{Number(
+									event.tickets?.find(
+										(ticket) => ticket.selection === "Left",
+									)?.amount ?? 0,
+								) /
+									(event.left_decimal ??
+										web3.LAMPORTS_PER_SOL)}{" "}
+								{renderMintValue(event.left_mint)}
+							</p>
+							{event.result === "Left" && (
+								<TooltipCorrectOption />
+							)}
 						</div>
 						<div
 							className={clsx(
 								{
 									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
-										true,
+										event.result !== "Left",
 								},
-								"min-w-[100px] px-2 py-1",
+								"relative w-[150px] px-2 py-1",
 							)}
 						>
 							<p>{event.right_description}</p>
+							<p className="text-sm">
+								Voted:{" "}
+								{Number(
+									event.tickets?.find(
+										(ticket) =>
+											ticket.selection === "Right",
+									)?.amount ?? 0,
+								) /
+									(event.right_decimal ??
+										web3.LAMPORTS_PER_SOL)}{" "}
+								{renderMintValue(event.right_mint)}
+							</p>
+							{event.result === "Right" && (
+								<TooltipCorrectOption />
+							)}
 						</div>
 					</div>
 				);
 
 			case "status":
-				if (dayjs(event.endDate).isBefore(Date.now()))
-					return (
-						<div className="w-[200px] text-right text-red-500">
-							<p>Ended</p>
-							{dayjs(event.endDate).format(
-								"DD/MM/YYYY - HH:mm A",
-							)}
-						</div>
-					);
 				return (
-					<div className="w-[200px] text-right text-green-500">
-						<p>Ongoing</p>
-						{dayjs(event.endDate).format("DD/MM/YYYY - HH:mm A")}
+					<div className="w-[200px] text-right">
+						{renderStatusLabel(event)}
 					</div>
 				);
 			case "result":
-				return (
-					<p
-						className={clsx({
-							"text-red-500": event.result === "LOSE",
-							"text-green-500": event.result === "WIN",
-						})}
-					>
-						{event.result}
-					</p>
-				);
+				if (event.burning) return <Button>Token burned</Button>;
+				if (event.result)
+					return (
+						<ButtonClaimReward refetch={refetch} event={event} />
+					);
+				return <p>Waiting result</p>;
 			default:
 				return getKeyValue(event, columnKey);
 		}
 	};
 	return (
-		<Table aria-label="Example table with dynamic content">
+		<Table
+			aria-label="Example table with dynamic content"
+			bottomContent={
+				<div className="flex w-full justify-center">
+					<Pagination
+						isCompact
+						showControls
+						showShadow
+						page={page}
+						total={Math.ceil(
+							(participatedEvents?.total ?? 0) /
+								PAGE_SIZE_DEFAULT,
+						)}
+						onChange={(page) => setPage(page)}
+					/>
+				</div>
+			}
+		>
 			<TableHeader columns={columns}>
 				{(column) => (
 					<TableColumn align={column.align! as any} key={column.key}>
@@ -131,16 +235,23 @@ export default function MyParticipatedEvents() {
 					</TableColumn>
 				)}
 			</TableHeader>
-			<TableBody items={rows} emptyContent={"No rows to display."}>
-				{(item) => (
+			<TableBody
+				items={participatedEvents?.nodes || []}
+				emptyContent={"No rows to display."}
+			>
+				{(participatedEvents?.nodes ?? [])?.map((item, index) => (
 					<TableRow key={item.id}>
 						{(columnKey) => (
 							<TableCell>
-								{renderCellValue(item, columnKey.toString())}
+								{renderCellValue(
+									item,
+									columnKey.toString(),
+									index,
+								)}
 							</TableCell>
 						)}
 					</TableRow>
-				)}
+				))}
 			</TableBody>
 		</Table>
 	);
