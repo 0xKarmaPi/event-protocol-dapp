@@ -19,7 +19,13 @@ import { useAnchor } from "@/hooks/useAnchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-toastify";
 
-export default function SetPredictionResultModal({ event }: { event: IEvent }) {
+export default function SetPredictionResultModal({
+	event,
+	refetch,
+}: {
+	event: IEvent;
+	refetch: () => void;
+}) {
 	const [selectedOption, setSelectedOption] = useState<
 		"left" | "right" | null
 	>(null);
@@ -36,9 +42,8 @@ export default function SetPredictionResultModal({ event }: { event: IEvent }) {
 		mutationFn: finishEvent,
 		mutationKey: ["setResultEvent"],
 		onSuccess: (res) => {
-			console.log(res);
-
 			if (res) {
+				refetch();
 				toast("Set result successfully", { type: "success" });
 				onOpenChange();
 			}
@@ -62,9 +67,11 @@ export default function SetPredictionResultModal({ event }: { event: IEvent }) {
 				optionCorrect: selectedOption,
 				program,
 				signer: publicKey,
+				eventPubkey: new web3.PublicKey(event.pubkey),
 			});
 		}
 	}, [
+		event.pubkey,
 		event.id,
 		event.left_mint,
 		event.right_mint,

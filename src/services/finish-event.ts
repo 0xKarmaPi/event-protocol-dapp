@@ -16,6 +16,7 @@ export const finishEvent = async ({
 	leftMint,
 	rightMint,
 	optionCorrect,
+	eventPubkey,
 }: {
 	signer: web3.PublicKey;
 	program: Program<EventProtocol>;
@@ -23,6 +24,7 @@ export const finishEvent = async ({
 	leftMint: web3.PublicKey | null;
 	rightMint: web3.PublicKey | null;
 	optionCorrect: "left" | "right";
+	eventPubkey: web3.PublicKey;
 }) => {
 	const transaction = new web3.Transaction();
 
@@ -30,6 +32,7 @@ export const finishEvent = async ({
 		[Buffer.from("master")],
 		program.programId,
 	);
+
 	const [leftPool] = web3.PublicKey.findProgramAddressSync(
 		[TOKENS_LEFT_POOL_SEEDS_PREFIX, eventId.toBuffer()],
 		program.programId,
@@ -40,10 +43,14 @@ export const finishEvent = async ({
 		program.programId,
 	);
 
+	console.log(await program.provider.connection.getAccountInfo(rightPool));
+
 	let creatorLeftBeneficiaryAta = null;
 	let creatorRightBeneficiaryAta = null;
 	let systemRightFee = null;
 	let systemLeftFee = null;
+	let leftPoolValue = null;
+	let rightPoolValue = null;
 
 	if (optionCorrect === "left" && rightMint) {
 		systemRightFee = web3.PublicKey.findProgramAddressSync(
@@ -58,6 +65,7 @@ export const finishEvent = async ({
 			rightMint,
 			signer,
 		);
+		rightPoolValue = rightPool;
 	} else if (optionCorrect === "right" && leftMint) {
 		systemLeftFee = web3.PublicKey.findProgramAddressSync(
 			[TOKENS_SYSTEM_FEE_SEEDS_PREFIX, leftMint.toBuffer()],
@@ -71,7 +79,20 @@ export const finishEvent = async ({
 			leftMint,
 			signer,
 		);
+		leftPoolValue = leftPool;
 	}
+
+	console.log("finish event", {
+		leftMint,
+		creatorLeftBeneficiaryAta,
+		systemLeftFee,
+		leftPool: leftPoolValue,
+
+		rightMint,
+		creatorRightBeneficiaryAta,
+		systemRightFee,
+		rightPool: rightPoolValue,
+	});
 
 	const finishEventInstruction = await program.methods
 		.finishEvent(optionCorrect === "left" ? SIDE.Left : SIDE.Right)
@@ -79,15 +100,15 @@ export const finishEvent = async ({
 			leftMint,
 			creatorLeftBeneficiaryAta,
 			systemLeftFee,
-			leftPool,
+			leftPool: leftPoolValue,
 
 			rightMint,
 			creatorRightBeneficiaryAta,
 			systemRightFee,
-			rightPool,
+			rightPool: rightPoolValue,
 
 			master: masterAccount,
-			event: eventId,
+			event: eventPubkey,
 			signer,
 			systemProgram: web3.SystemProgram.programId,
 			tokenProgram: spl.TOKEN_PROGRAM_ID,
@@ -96,8 +117,9 @@ export const finishEvent = async ({
 		.instruction();
 
 	transaction.add(finishEventInstruction);
-	const result = await program?.provider?.sendAndConfirm?.(transaction);
-	console.log(result);
+	const result = await program?.provider?.sendAndConfirm?.(transaction, [], {
+		commitment: "finalized",
+	});
 
 	return result;
 };

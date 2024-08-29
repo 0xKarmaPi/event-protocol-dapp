@@ -87,7 +87,7 @@ export default function SelectTokenModal({
 											}}
 										>
 											<div className="flex gap-1">
-												<div className="aspect-square h-[34px] rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+												<div className="aspect-square h-[34px] rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
 													{token.icon}
 												</div>
 												<div>

@@ -1,11 +1,12 @@
 import { IEvent } from "@/types/event";
-import { shortAddress } from "@/utils/common";
+import { renderMintValue, shortAddress } from "@/utils/common";
 import {
 	Card,
 	CardHeader,
 	CardBody,
 	CardFooter,
 	Button,
+	Chip,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import Image from "next/image";
@@ -16,6 +17,56 @@ type EventItemProps = {
 	event: IEvent;
 };
 export default function EventItem({ event }: EventItemProps) {
+	const renderStatusLabel = (event: IEvent) => {
+		const now = dayjs();
+		const startDate = dayjs(event.start_date);
+		const endDate = dayjs(event.end_date);
+
+		if (now.isBefore(startDate)) {
+			return (
+				<div className="text-gray-400">
+					<Chip color="default">Upcomming</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format(
+							"DD MMM YYYY - HH:mm A",
+						)}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		if (now.isAfter(endDate)) {
+			return (
+				<div className="text-red-500">
+					<Chip color="danger" variant="flat">
+						Ended
+					</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		return (
+			<div className="text-green-500">
+				<Chip color="success">On going</Chip>
+				<p>
+					From:{" "}
+					{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+				</p>
+				<p>To: {dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}</p>
+			</div>
+		);
+	};
 	return (
 		<Card key={event.id} className="h-full md:min-w-[150px]">
 			<CardHeader>
@@ -38,23 +89,7 @@ export default function EventItem({ event }: EventItemProps) {
 						</div>
 					</div>
 					<div className="w-1/2 text-right text-xs">
-						<p
-							className={cx(
-								"text-xs",
-								dayjs(event.end_date).isBefore(Date.now())
-									? "text-red-500"
-									: "text-green-500",
-							)}
-						>
-							{dayjs(event.end_date).isBefore(Date.now())
-								? "Ended"
-								: "End Time"}
-							<br />
-							{dayjs(event.end_date).isAfter(Date.now()) &&
-								dayjs(event.end_date).format(
-									"YYYY-MM-DD HH:mm:ss UTC Z",
-								)}
-						</p>
+						{renderStatusLabel(event)}
 					</div>
 				</div>
 			</CardHeader>
@@ -75,9 +110,7 @@ export default function EventItem({ event }: EventItemProps) {
 						</div>
 						<div className="text-center text-sm opacity-60">
 							Acceptable Vote Tick:{` `}
-							{event.left_mint
-								? shortAddress(event.left_mint)
-								: "SOL"}
+							{renderMintValue(event.left_mint)}
 						</div>
 					</div>
 					<div className="flex flex-col items-center gap-2">
@@ -89,9 +122,7 @@ export default function EventItem({ event }: EventItemProps) {
 						</div>
 						<div className="text-center text-sm opacity-60">
 							Acceptable Vote Tick:{` `}
-							{event.right_mint
-								? shortAddress(event.left_mint)
-								: "SOL"}
+							{renderMintValue(event.right_mint)}
 						</div>
 					</div>
 				</div>

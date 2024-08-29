@@ -11,7 +11,7 @@ export interface IEvent {
 	leftMint: web3.PublicKey | null;
 	rightMint: web3.PublicKey | null;
 	burning?: boolean;
-	result?: "WIN" | "LOSE";
+	result?: "Left" | "Right";
 	left_description: string;
 	left_mint: string;
 	right_description: string;

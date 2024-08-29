@@ -1,6 +1,6 @@
 "use client";
 
-import { shortAddress } from "@/utils/common";
+import { renderMintValue, shortAddress } from "@/utils/common";
 import {
 	Card,
 	CardHeader,
@@ -9,6 +9,7 @@ import {
 	Button,
 	Input,
 	Skeleton,
+	Chip,
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import { useState, useCallback, useEffect, useMemo } from "react";
@@ -25,7 +26,7 @@ import { makeAVoteTransaction } from "@/services/make-a-vote";
 import { web3 } from "@coral-xyz/anchor";
 import { useAnchor } from "@/hooks/useAnchor";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { TICKET_SEEDS_PREFIX } from "@/utils/constants";
+import { EVENT_TOKEN_DECIMAL, TICKET_SEEDS_PREFIX } from "@/utils/constants";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 
 const TOKEN_ICONS = {
@@ -44,7 +45,9 @@ export default function EventDetailForm({
 	isPending: boolean;
 	isError: boolean;
 }) {
-	const [selectedOption, setSelectedOption] = useState<number | undefined>();
+	const [selectedOption, setSelectedOption] = useState<
+		"left" | "right" | undefined
+	>();
 	const [amount, setAmount] = useState<string>("0");
 	const [balanceTokenVote, setBalanceTokenVote] = useState(0);
 
@@ -70,11 +73,11 @@ export default function EventDetailForm({
 		try {
 			let mintAddress;
 			switch (selectedOption) {
-				case 0:
+				case "left":
 					mintAddress = event?.left_mint;
 					break;
 
-				case 1:
+				case "right":
 					mintAddress = event?.right_mint;
 					break;
 			}
@@ -89,7 +92,14 @@ export default function EventDetailForm({
 					program.provider.connection,
 					associatedToken,
 				);
-				balance = Number(account.amount) / web3.LAMPORTS_PER_SOL;
+				if (
+					mintAddress ===
+					process.env.NEXT_PUBLIC_EVENT_TOKEN_MINT_ADDRESS
+				) {
+					balance = Number(account.amount) / EVENT_TOKEN_DECIMAL;
+				} else {
+					balance = Number(account.amount) / web3.LAMPORTS_PER_SOL;
+				}
 				setBalanceTokenVote(balance);
 			} else {
 				setBalanceTokenVote(balance / web3.LAMPORTS_PER_SOL);
@@ -110,7 +120,7 @@ export default function EventDetailForm({
 			toast("Please connect your wallet", { type: "error" });
 			return;
 		}
-		if (selectedOption !== 0 && selectedOption !== 1) {
+		if (!selectedOption) {
 			toast("Please select an option", { type: "error" });
 			return;
 		}
@@ -127,7 +137,7 @@ export default function EventDetailForm({
 			amount: Number(amount),
 			event: new web3.PublicKey(event?.pubkey || ""),
 			program,
-			selection: selectedOption === 0 ? "left" : "right",
+			selection: selectedOption,
 			signer: publicKey,
 		});
 	}, [
@@ -140,19 +150,76 @@ export default function EventDetailForm({
 		selectedOption,
 	]);
 	const renderBalanceUnit = useMemo(() => {
-		if (selectedOption === 0) {
-			return event?.left_mint ? shortAddress(event?.left_mint) : "SOL";
+		if (selectedOption === "left") {
+			return renderMintValue(event?.left_mint);
 		}
-		if (selectedOption === 1) {
-			return event?.right_mint ? shortAddress(event?.right_mint) : "SOL";
+		if (selectedOption === "right") {
+			return renderMintValue(event?.right_mint);
 		}
 		return "SOL";
 	}, [event?.left_mint, event?.right_mint, selectedOption]);
+
+	const isEventEnded = useMemo(() => {
+		const now = dayjs();
+		const endDate = dayjs(event?.end_date);
+		return now.isAfter(endDate);
+	}, [event]);
 
 	useEffect(() => {
 		if (publicKey && event) fetchTokenBalance();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [publicKey, event, selectedOption]);
+
+	const renderStatusLabel = (event: IEvent) => {
+		const now = dayjs();
+		const startDate = dayjs(event.start_date);
+		const endDate = dayjs(event.end_date);
+
+		if (now.isBefore(startDate)) {
+			return (
+				<div className="text-gray-400">
+					<Chip color="default">Upcomming</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format(
+							"DD MMM YYYY - HH:mm A",
+						)}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		if (now.isAfter(endDate)) {
+			return (
+				<div className="text-red-500">
+					<Chip color="danger" variant="flat">
+						Ended
+					</Chip>
+					<p>
+						From:{" "}
+						{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+					<p>
+						To:{" "}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
+					</p>
+				</div>
+			);
+		}
+		return (
+			<div className="text-green-500">
+				<Chip color="success">On going</Chip>
+				<p>
+					From:{" "}
+					{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
+				</p>
+				<p>To: {dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}</p>
+			</div>
+		);
+	};
 
 	if (isPending) {
 		return (
@@ -206,23 +273,7 @@ export default function EventDetailForm({
 					</div>
 					<div className="ml-auto text-right">
 						<div className="w-full text-right text-xs">
-							<p
-								className={cx(
-									"text-xs",
-									dayjs(event?.end_date).isBefore(Date.now())
-										? "text-red-500"
-										: "text-green-500",
-								)}
-							>
-								{dayjs(event?.end_date).isBefore(Date.now())
-									? "Ended"
-									: "End Time"}
-								<br />
-								{dayjs(event?.end_date).isAfter(Date.now()) &&
-									dayjs(event?.end_date).format(
-										"YYYY-MM-DD HH:mm:ss UTC Z",
-									)}
-							</p>
+							{renderStatusLabel(event)}
 						</div>
 					</div>
 				</div>
@@ -241,9 +292,7 @@ export default function EventDetailForm({
 							Vote amount:
 							<div className="flex">
 								{event.left_amount ?? 0}{" "}
-								{event.left_mint
-									? shortAddress(event.left_mint)
-									: "SOL"}
+								{renderMintValue(event.left_mint)}
 							</div>
 						</div>
 					</div>
@@ -257,9 +306,7 @@ export default function EventDetailForm({
 							Vote amount:
 							<div className="flex">
 								{event.right_amount ?? 0}{" "}
-								{event.right_mint
-									? shortAddress(event.right_mint)
-									: "SOL"}
+								{renderMintValue(event.right_mint)}
 							</div>
 						</div>
 					</div>
@@ -271,20 +318,20 @@ export default function EventDetailForm({
 				<div className="flex w-full flex-row gap-2">
 					<Button
 						color="success"
-						variant={selectedOption === 0 ? "solid" : "light"}
+						variant={selectedOption === "left" ? "solid" : "light"}
 						fullWidth
 						onClick={() => {
-							setSelectedOption(0);
+							setSelectedOption("left");
 						}}
 					>
 						{event?.left_description}
 					</Button>
 					<Button
 						color="danger"
-						variant={selectedOption === 1 ? "solid" : "light"}
+						variant={selectedOption === "right" ? "solid" : "light"}
 						fullWidth
 						onClick={() => {
-							setSelectedOption(1);
+							setSelectedOption("right");
 						}}
 					>
 						{event?.right_description}
@@ -313,12 +360,13 @@ export default function EventDetailForm({
 				</div>
 
 				<Button
+					isDisabled={!selectedOption || !amount || isEventEnded}
 					isLoading={mutateMakeAVote.isPending}
 					className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 					fullWidth
 					onClick={handleClickSubmit}
 				>
-					Submit Predict
+					{isEventEnded ? "The event has ended" : "Submit Predict"}
 				</Button>
 			</CardBody>
 			<Divider />

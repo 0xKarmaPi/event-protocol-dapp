@@ -1,6 +1,6 @@
 import { getEvents } from "@/services/event";
 import { IEvent } from "@/types/event";
-import { shortAddress } from "@/utils/common";
+import { renderMintValue, shortAddress } from "@/utils/common";
 import { PAGE_SIZE_DEFAULT } from "@/utils/constants";
 import {
 	Table,
@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import SetPredictionResultModal from "./SetPredictionResultModal";
 import { AiFillDelete } from "react-icons/ai";
+import TooltipCorrectOption from "./TooltipCorrectOption";
 
 export default function MyCreatedEvents() {
 	const { publicKey } = useWallet();
@@ -52,11 +53,17 @@ export default function MyCreatedEvents() {
 			align: "center",
 		},
 	];
+	const { data: createdEvents, refetch } = useQuery({
+		queryKey: ["createdEvents", page, publicKey],
+		queryFn: () =>
+			getEvents({
+				page: page,
+				limit: PAGE_SIZE_DEFAULT,
+				creator: publicKey?.toString(),
+			}),
+		enabled: !!publicKey,
+	});
 
-	const renderMintValue = (mint?: string) => {
-		if (!mint) return "SOL";
-		return shortAddress(mint);
-	};
 	const renderStatusLabel = (event: IEvent) => {
 		const now = dayjs();
 		const startDate = dayjs(event.start_date);
@@ -74,7 +81,7 @@ export default function MyCreatedEvents() {
 					</p>
 					<p>
 						To:{" "}
-						{dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
 					</p>
 				</div>
 			);
@@ -87,13 +94,11 @@ export default function MyCreatedEvents() {
 					</Chip>
 					<p>
 						From:{" "}
-						{dayjs(event.start_date).format(
-							"DD MMM YYYY - HH:mm A",
-						)}
+						{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
 					</p>
 					<p>
 						To:{" "}
-						{dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
+						{dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}
 					</p>
 				</div>
 			);
@@ -103,11 +108,9 @@ export default function MyCreatedEvents() {
 				<Chip color="success">On going</Chip>
 				<p>
 					From:{" "}
-					{dayjs(event.start_date).format("DD MMM YYYY - HH:mm A")}
+					{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
 				</p>
-				<p>
-					To: {dayjs(event.end_date).format("DD MMM YYYY - HH:mm A")}
-				</p>
+				<p>To: {dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}</p>
 			</div>
 		);
 	};
@@ -129,29 +132,35 @@ export default function MyCreatedEvents() {
 							className={clsx(
 								{
 									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
-										true,
+										event.result !== "Right",
 								},
-								"w-[150px] px-2 py-1",
+								"relative w-[150px] px-2 py-1",
 							)}
 						>
 							<p>{event.left_description}</p>
 							<p className="text-xs">
 								Accept: {renderMintValue(event.left_mint)}
 							</p>
+							{event.result === "Left" && (
+								<TooltipCorrectOption />
+							)}
 						</div>
 						<div
 							className={clsx(
 								{
 									"rounded-lg border border-primary bg-gradient-to-tr from-blue-900 to-purple-500 text-white":
-										true,
+										event.result !== "Left",
 								},
-								"w-[150px] px-2 py-1",
+								"relative w-[150px] px-2 py-1",
 							)}
 						>
 							<p>{event.right_description}</p>
 							<p className="text-xs">
 								Accept: {renderMintValue(event.right_mint)}
 							</p>
+							{event.result === "Right" && (
+								<TooltipCorrectOption />
+							)}
 						</div>
 					</div>
 				);
@@ -163,6 +172,13 @@ export default function MyCreatedEvents() {
 					</div>
 				);
 			case "action":
+				if (event.result)
+					return (
+						<p>
+							Finished <br />
+							{`${event.result} is correct`}
+						</p>
+					);
 				if (dayjs(event.start_date).isAfter(Date.now()))
 					return (
 						<Button
@@ -170,26 +186,22 @@ export default function MyCreatedEvents() {
 							variant="flat"
 							startContent={<AiFillDelete />}
 						>
-							Delete{" "}
+							Delete
 						</Button>
 					);
 				if (dayjs(event.end_date).isBefore(Date.now()))
-					return <SetPredictionResultModal event={event} />;
+					return (
+						<SetPredictionResultModal
+							refetch={refetch}
+							event={event}
+						/>
+					);
 				return <></>;
 			default:
 				return getKeyValue(event, columnKey);
 		}
 	};
-	const { data: createdEvents } = useQuery({
-		queryKey: ["createdEvents", page, publicKey],
-		queryFn: () =>
-			getEvents({
-				page: page,
-				limit: PAGE_SIZE_DEFAULT,
-				creator: publicKey?.toString(),
-			}),
-		enabled: !!publicKey,
-	});
+
 	return (
 		<Table
 			bottomContent={

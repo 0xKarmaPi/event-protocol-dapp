@@ -18,3 +18,15 @@ export function shortAddress(
 		return "";
 	}
 }
+
+export const formatPrice = (price: number): string => {
+	// Format price with comma separators for thousands and two decimal places
+	return price.toFixed(3).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+};
+
+export const renderMintValue = (mint?: string) => {
+	if (!mint) return "SOL";
+	if (mint === process.env.NEXT_PUBLIC_EVENT_TOKEN_MINT_ADDRESS)
+		return "$EVENT";
+	return shortAddress(mint);
+};

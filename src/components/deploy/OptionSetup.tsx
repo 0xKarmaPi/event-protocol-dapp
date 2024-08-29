@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import sol from "/public/assets/solana.png";
-import jup from "/public/assets/jupiter.png";
-import raydium from "/public/assets/raydium.webp";
+import eventTokenLogo from "/public/assets/logo.png";
 import Image from "next/image";
 import { Input, useDisclosure } from "@nextui-org/react";
 import { shortAddress } from "@/utils/common";
@@ -27,19 +26,34 @@ export const TOKENS: TokenOption[] = [
 		balance: 1000,
 	},
 	{
-		name: "Jupiter",
-		value: "JUP",
-		icon: <Image src={jup} alt="Jupiter" width={32} height={32} />,
-		address: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
-		balance: 500,
+		name: "Event Token",
+		value: "EVENT",
+		icon: (
+			<Image
+				src={eventTokenLogo}
+				alt="Event Token"
+				width={32}
+				height={32}
+				className="rounded-full"
+			/>
+		),
+		address: process.env.NEXT_PUBLIC_EVENT_TOKEN_MINT_ADDRESS!,
+		balance: 1000,
 	},
-	{
-		name: "Raydium",
-		value: "RAY",
-		icon: <Image src={raydium} alt="Raydium" width={32} height={32} />,
-		address: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
-		balance: 100,
-	},
+	// {
+	// 	name: "Jupiter",
+	// 	value: "JUP",
+	// 	icon: <Image src={jup} alt="Jupiter" width={32} height={32} />,
+	// 	address: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+	// 	balance: 500,
+	// },
+	// {
+	// 	name: "Raydium",
+	// 	value: "RAY",
+	// 	icon: <Image src={raydium} alt="Raydium" width={32} height={32} />,
+	// 	address: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+	// 	balance: 100,
+	// },
 ];
 export default function OptionSetup({
 	optionName,
@@ -84,7 +98,7 @@ export default function OptionSetup({
 						onClick={onOpen}
 					>
 						<div className="flex gap-1">
-							<div className="h-fit rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[2px]">
+							<div className="h-fit rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-[1px]">
 								{type.icon}
 							</div>
 							<div className="text-left">
