@@ -1,6 +1,6 @@
 import { getEvents } from "@/services/event";
 import { IEvent } from "@/types/event";
-import { renderMintValue, shortAddress } from "@/utils/common";
+import { renderMintValue } from "@/utils/common";
 import { PAGE_SIZE_DEFAULT } from "@/utils/constants";
 import {
 	Table,
@@ -12,7 +12,6 @@ import {
 	getKeyValue,
 	Pagination,
 	Chip,
-	Button,
 } from "@nextui-org/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +19,6 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { useState } from "react";
 import SetPredictionResultModal from "./SetPredictionResultModal";
-import { AiFillDelete } from "react-icons/ai";
 import TooltipCorrectOption from "./TooltipCorrectOption";
 import ButtonDeleteEvent from "./ButtonDeleteEvent";
 

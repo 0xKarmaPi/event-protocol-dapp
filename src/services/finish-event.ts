@@ -70,7 +70,7 @@ export const finishEvent = async ({
 		creatorRightBeneficiaryAta = await addCreateAtaInsIfNotExist(
 			transaction,
 			program.provider.connection,
-			systemRightFee,
+			signer,
 			rightMint,
 			signer,
 		);
@@ -95,7 +95,7 @@ export const finishEvent = async ({
 		creatorLeftBeneficiaryAta = await addCreateAtaInsIfNotExist(
 			transaction,
 			program.provider.connection,
-			systemLeftFee,
+			signer,
 			leftMint,
 			signer,
 		);
