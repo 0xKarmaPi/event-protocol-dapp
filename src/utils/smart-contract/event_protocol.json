@@ -1,5 +1,5 @@
 {
-  "address": "4om3tmwcjESCkngvezJSyAerKgSfggCgf2LZe4XZk3HL",
+  "address": "3QBHFR3hQrqkuHcgFsxoQB4wta7uKQoDHe4Fg8Bk1q8N",
   "metadata": {
     "name": "event_protocol",
     "version": "0.1.0",
@@ -1956,15 +1956,20 @@
     {
       "code": 6015,
       "name": "ResultNotSetEvent",
-      "msg": "The event has not set result"
+      "msg": "The event's result has not set"
     },
     {
       "code": 6016,
+      "name": "ResultAlreadySetEvent",
+      "msg": "The event's result has been set"
+    },
+    {
+      "code": 6017,
       "name": "AlreadyClaimed",
       "msg": "Already claimed from this event"
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "AlreadyWithdrawn",
       "msg": "Already withdrawn from this event"
     }
@@ -2065,6 +2070,18 @@
             "name": "right_mint",
             "type": {
               "option": "pubkey"
+            }
+          },
+          {
+            "name": "left_mint_decimals",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "right_mint_decimals",
+            "type": {
+              "option": "u8"
             }
           }
         ]
@@ -2300,7 +2317,7 @@
             }
           },
           {
-            "name": "amount",
+            "name": "current_amount",
             "type": "u64"
           }
         ]

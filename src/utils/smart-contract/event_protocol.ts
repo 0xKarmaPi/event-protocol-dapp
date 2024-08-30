@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/event_protocol.json`.
  */
 export type EventProtocol = {
-	address: "4om3tmwcjESCkngvezJSyAerKgSfggCgf2LZe4XZk3HL";
+	address: "3QBHFR3hQrqkuHcgFsxoQB4wta7uKQoDHe4Fg8Bk1q8N";
 	metadata: {
 		name: "eventProtocol";
 		version: "0.1.0";
@@ -1743,15 +1743,20 @@ export type EventProtocol = {
 		{
 			code: 6015;
 			name: "resultNotSetEvent";
-			msg: "The event has not set result";
+			msg: "The event's result has not set";
 		},
 		{
 			code: 6016;
+			name: "resultAlreadySetEvent";
+			msg: "The event's result has been set";
+		},
+		{
+			code: 6017;
 			name: "alreadyClaimed";
 			msg: "Already claimed from this event";
 		},
 		{
-			code: 6017;
+			code: 6018;
 			name: "alreadyWithdrawn";
 			msg: "Already withdrawn from this event";
 		},
@@ -1852,6 +1857,18 @@ export type EventProtocol = {
 						name: "rightMint";
 						type: {
 							option: "pubkey";
+						};
+					},
+					{
+						name: "leftMintDecimals";
+						type: {
+							option: "u8";
+						};
+					},
+					{
+						name: "rightMintDecimals";
+						type: {
+							option: "u8";
 						};
 					},
 				];
@@ -2063,7 +2080,7 @@ export type EventProtocol = {
 						};
 					},
 					{
-						name: "amount";
+						name: "currentAmount";
 						type: "u64";
 					},
 				];
