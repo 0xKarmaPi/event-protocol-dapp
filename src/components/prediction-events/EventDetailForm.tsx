@@ -15,26 +15,19 @@ import dayjs from "dayjs";
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import Image from "next/image";
-import cx from "clsx";
-import sol from "/public/assets/solana.png";
-import jup from "/public/assets/jupiter.png";
-import raydium from "/public/assets/raydium.webp";
-import { GiTwoCoins } from "react-icons/gi";
 import { IEvent } from "@/types/event";
 import { useMutation } from "@tanstack/react-query";
-import { makeAVoteTransaction } from "@/services/make-a-vote";
-import { web3 } from "@coral-xyz/anchor";
+import {
+	CreateMakeAVoteTransaction,
+	createMakeAVoteTransaction,
+} from "@/services/make-a-vote";
+import { Program, web3 } from "@coral-xyz/anchor";
 import { useAnchor } from "@/hooks/useAnchor";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { EVENT_TOKEN_DECIMAL, TICKET_SEEDS_PREFIX } from "@/utils/constants";
+import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
-
-const TOKEN_ICONS = {
-	SOL: <Image src={sol} alt="Solana" width={24} height={24} />,
-	RAY: <Image src={raydium} alt="Raydium" width={24} height={24} />,
-	JUP: <Image src={jup} alt="Jupiter" width={24} height={24} />,
-	CUSTOM: <GiTwoCoins className="h-6 w-6 text-yellow-500" />,
-};
+import { EventProtocol } from "@/utils/smart-contract/event_protocol";
+import { FaCopy } from "react-icons/fa";
 
 export default function EventDetailForm({
 	event,
@@ -55,7 +48,10 @@ export default function EventDetailForm({
 	const { publicKey } = useWallet();
 
 	const mutateMakeAVote = useMutation({
-		mutationFn: makeAVoteTransaction,
+		mutationFn: async (variables: CreateMakeAVoteTransaction) => {
+			const tx = await createMakeAVoteTransaction(variables);
+			return program?.provider?.sendAndConfirm?.(tx);
+		},
 		mutationKey: ["makeAVote"],
 		onSuccess: (res) => {
 			toast("Voted successfully", { type: "success" });
@@ -135,19 +131,19 @@ export default function EventDetailForm({
 
 		mutateMakeAVote.mutate({
 			amount: Number(amount),
-			event: new web3.PublicKey(event?.pubkey || ""),
 			program,
 			selection: selectedOption,
 			signer: publicKey,
+			eventDetail: event!,
 		});
 	}, [
 		amount,
 		balanceTokenVote,
-		event?.pubkey,
 		mutateMakeAVote,
 		program,
 		publicKey,
 		selectedOption,
+		event,
 	]);
 	const renderBalanceUnit = useMemo(() => {
 		if (selectedOption === "left") {
@@ -170,6 +166,21 @@ export default function EventDetailForm({
 		const startDate = dayjs(event?.start_date);
 		return now.isBefore(startDate);
 	}, [event]);
+
+	const handleCopyBlink = () => {
+		const blink = new URL(
+			`/api/actions/vote?eventId=${event?.id}`,
+			window.location.origin,
+		).toString();
+		navigator.clipboard
+			.writeText(blink)
+			.then(() => {
+				toast.success("Copied to clipboard");
+			})
+			.catch(() => {
+				toast.error("Failed to copy");
+			});
+	};
 
 	useEffect(() => {
 		if (publicKey && event) fetchTokenBalance();
@@ -273,9 +284,6 @@ export default function EventDetailForm({
 						<p className="text-md text-primary">
 							Eventprotocol Battle
 						</p>
-						<p className="text-small">
-							{shortAddress(event?.address)}
-						</p>
 					</div>
 					<div className="ml-auto text-right">
 						<div className="w-full text-right text-xs">
@@ -363,24 +371,33 @@ export default function EventDetailForm({
 					/>
 				</div>
 
-				<Button
-					isDisabled={
-						!selectedOption ||
-						!amount ||
-						isEventEnded ||
-						isEventUpcomming
-					}
-					isLoading={mutateMakeAVote.isPending}
-					className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
-					fullWidth
-					onClick={handleClickSubmit}
-				>
-					{isEventEnded
-						? "The event has ended"
-						: isEventUpcomming
-							? "The event has not started yet"
-							: "Submit Predict"}
-				</Button>
+				<div className="grid grid-cols-4 gap-4">
+					<Button
+						isDisabled={
+							!selectedOption ||
+							!amount ||
+							isEventEnded ||
+							isEventUpcomming
+						}
+						isLoading={mutateMakeAVote.isPending}
+						className="col-span-3 bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
+						fullWidth
+						onClick={handleClickSubmit}
+					>
+						{isEventEnded
+							? "The event has ended"
+							: isEventUpcomming
+								? "The event has not started yet"
+								: "Submit Predict"}
+					</Button>
+					<Button
+						startContent={<FaCopy />}
+						className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
+						onPress={handleCopyBlink}
+					>
+						Copy Blink
+					</Button>
+				</div>
 			</CardBody>
 			<Divider />
 		</Card>

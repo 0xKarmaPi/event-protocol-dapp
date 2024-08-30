@@ -1,5 +1,5 @@
 import { IEvent } from "@/types/event";
-import { renderMintValue, shortAddress } from "@/utils/common";
+import { renderMintValue } from "@/utils/common";
 import {
 	Card,
 	CardHeader,
@@ -10,13 +10,28 @@ import {
 } from "@nextui-org/react";
 import dayjs from "dayjs";
 import Image from "next/image";
-import cx from "clsx";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 type EventItemProps = {
 	event: IEvent;
 };
 export default function EventItem({ event }: EventItemProps) {
+	const handleCopyBlink = () => {
+		const blink = new URL(
+			`/api/actions/vote?eventId=${event.id}`,
+			window.location.origin,
+		).toString();
+		navigator.clipboard
+			.writeText(blink)
+			.then(() => {
+				toast.success("Copied to clipboard");
+			})
+			.catch(() => {
+				toast.error("Failed to copy");
+			});
+	};
+
 	const renderStatusLabel = (event: IEvent) => {
 		const now = dayjs();
 		const startDate = dayjs(event.start_date);
@@ -83,9 +98,6 @@ export default function EventItem({ event }: EventItemProps) {
 							<p className="text-md text-primary">
 								Eventprotocol
 							</p>
-							<p className="text-xs">
-								{shortAddress(event.address)}
-							</p>
 						</div>
 					</div>
 					<div className="w-1/2 text-right text-xs">
@@ -126,11 +138,19 @@ export default function EventItem({ event }: EventItemProps) {
 						</div>
 					</div>
 				</div>
-				<Link href={`/prediction-events/${event.id}`}>
-					<Button className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg">
-						View Detail
+				<div className="flex gap-1">
+					<Link href={`/prediction-events/${event.id}`}>
+						<Button className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg">
+							View Detail
+						</Button>
+					</Link>
+					<Button
+						className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg"
+						onPress={handleCopyBlink}
+					>
+						Copy Blink
 					</Button>
-				</Link>
+				</div>
 			</CardFooter>
 		</Card>
 	);

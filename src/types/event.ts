@@ -1,15 +1,8 @@
 import { web3 } from "@coral-xyz/anchor";
 
 export interface IEvent {
-	id?: string;
-	userId?: string;
+	id: string;
 	description: string;
-	createdAt?: string;
-	address?: string;
-	endDate?: string;
-	startDate?: string;
-	leftMint: web3.PublicKey | null;
-	rightMint: web3.PublicKey | null;
 	burning?: boolean;
 	result?: "Left" | "Right";
 	left_description: string;
@@ -18,14 +11,11 @@ export interface IEvent {
 	right_mint: string;
 	pubkey: string;
 	creator: string;
-	deleted: boolean;
 	end_date: string;
 	start_date: string;
-	left_amount?: number;
-	right_amount?: number;
 	tickets?: Array<EventTicket>;
-	left_decimal?: number;
-	right_decimal?: number;
+	left_mint_decimals?: number;
+	right_mint_decimals?: number;
 }
 
 export interface EventTicket {
