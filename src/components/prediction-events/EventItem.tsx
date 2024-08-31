@@ -144,12 +144,6 @@ export default function EventItem({ event }: EventItemProps) {
 							View Detail
 						</Button>
 					</Link>
-					<Button
-						className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg"
-						onPress={handleCopyBlink}
-					>
-						Copy Blink
-					</Button>
 				</div>
 			</CardFooter>
 		</Card>

@@ -10,9 +10,11 @@ import { web3 } from "@coral-xyz/anchor";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 import { formatPrice } from "@/utils/common";
 import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function MyBalance() {
 	const { program } = useAnchor();
+	const {publicKey} = useWallet();
 
 	const [myBalance, setMyBalance] = useState({
 		sol: 0,
@@ -22,7 +24,7 @@ export default function MyBalance() {
 	useEffect(() => {
 		fetchBalance().then((balance) => setMyBalance(balance));
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [publicKey]);
 
 	const fetchBalance = useCallback(async () => {
 		const solBalance = await program.provider.connection.getBalance(

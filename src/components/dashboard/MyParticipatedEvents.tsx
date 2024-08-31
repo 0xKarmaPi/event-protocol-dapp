@@ -155,8 +155,9 @@ export default function MyParticipatedEvents() {
 										(ticket) => ticket.selection === "Left",
 									)?.amount ?? 0,
 								) /
-									(event.left_mint_decimals ??
-										web3.LAMPORTS_PER_SOL)}{" "}
+									(event.left_mint_decimals
+										? 10 ** event.left_mint_decimals
+										: web3.LAMPORTS_PER_SOL)}{" "}
 								{renderMintValue(event.left_mint)}
 							</p>
 							{event.result === "Left" && (
@@ -181,8 +182,9 @@ export default function MyParticipatedEvents() {
 											ticket.selection === "Right",
 									)?.amount ?? 0,
 								) /
-									(event.right_mint_decimals ??
-										web3.LAMPORTS_PER_SOL)}{" "}
+									(event.right_mint_decimals
+										? 10 ** event.right_mint_decimals
+										: web3.LAMPORTS_PER_SOL)}{" "}
 								{renderMintValue(event.right_mint)}
 							</p>
 							{event.result === "Right" && (

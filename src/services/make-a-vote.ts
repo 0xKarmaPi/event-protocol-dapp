@@ -87,11 +87,19 @@ export const createMakeAVoteTransaction = async ({
 		rightPoolValue = rightPool;
 	}
 
+	const amountToken =
+		selection === "left"
+			? new anchor.BN(
+					amount * 10 ** (eventDetail.left_mint_decimals ?? 9),
+				)
+			: new anchor.BN(
+					amount * 10 ** (eventDetail.right_mint_decimals ?? 9),
+				);
 	transaction.add(
 		await program.methods
 			.voteEvent(
 				selection === "left" ? SIDE.Left : SIDE.Right,
-				new anchor.BN(amount * web3.LAMPORTS_PER_SOL),
+				amountToken,
 			)
 			.accountsStrict({
 				leftMint: eventDetail.left_mint

@@ -391,6 +391,7 @@ export default function EventDetailForm({
 								: "Submit Predict"}
 					</Button>
 					<Button
+						isDisabled={isEventEnded || isEventUpcomming}
 						startContent={<FaCopy />}
 						className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
 						onPress={handleCopyBlink}
