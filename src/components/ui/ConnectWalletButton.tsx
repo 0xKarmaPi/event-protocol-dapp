@@ -39,7 +39,9 @@ export default function ConnectWalletButton() {
 				id: publicKey?.toString()!,
 				redirect: true,
 			});
-			setCookie(COOKIES.ACCESSTOKEN, data.access_token);
+			setCookie(COOKIES.ACCESSTOKEN, data.access_token, {
+				maxAge: 12 * 60 * 60,
+			});
 			toast("Connected successfully", { type: "success" });
 		},
 		onError: () => {

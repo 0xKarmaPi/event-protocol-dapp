@@ -4,7 +4,7 @@ import { IEvent } from "@/types/event";
 import { web3 } from "@coral-xyz/anchor";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { FaCrown } from "react-icons/fa";
+import { FaCheck, FaCrown } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 export default function ButtonClaimReward({
@@ -64,10 +64,18 @@ export default function ButtonClaimReward({
 		)
 	) {
 		return (
-			<Button color="success" variant="bordered" isDisabled>
+			<Button
+				color="success"
+				variant="bordered"
+				isDisabled
+				startContent={<FaCheck />}
+			>
 				Claimed
 			</Button>
 		);
+	}
+	if (event.burning) {
+		return null;
 	}
 	// Have Won ticket & not claimed
 	return (

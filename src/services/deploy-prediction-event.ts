@@ -115,7 +115,9 @@ export const createPredictionEvent = async ({
 		transaction.add(creatRightTokenEventPoolIns);
 	}
 
-	await program?.provider?.sendAndConfirm?.(transaction);
+	await program?.provider?.sendAndConfirm?.(transaction, [], {
+		commitment: "finalized",
+	});
 
 	return {
 		id,

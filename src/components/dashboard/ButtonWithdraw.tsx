@@ -4,7 +4,7 @@ import { IEvent } from "@/types/event";
 import { web3 } from "@coral-xyz/anchor";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { FaCrown } from "react-icons/fa";
+import { FaCheck, FaCoins } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 export default function ButtonWithdraw({
@@ -50,7 +50,7 @@ export default function ButtonWithdraw({
 		}
 	};
 	// Doesn't have Won ticket
-	if (!event.tickets?.find((ticket) => ticket.withdrawn)) {
+	if (!event.tickets?.find((ticket) => ticket.result === "Won")) {
 		return null;
 	}
 
@@ -61,7 +61,12 @@ export default function ButtonWithdraw({
 		)
 	) {
 		return (
-			<Button color="success" variant="bordered" isDisabled>
+			<Button
+				color="success"
+				variant="bordered"
+				isDisabled
+				startContent={<FaCheck />}
+			>
 				Withdrawn
 			</Button>
 		);
@@ -72,10 +77,10 @@ export default function ButtonWithdraw({
 			onPress={onClickWithDrawEvents}
 			color="warning"
 			variant="flat"
-			startContent={<FaCrown />}
+			startContent={<FaCoins />}
 			isLoading={mutateWithDrawEvent.isPending}
 		>
-			Withdraw Rewards
+			Withdraw
 		</Button>
 	);
 }

@@ -106,6 +106,9 @@ export const withDrawEvent = async ({
 			[],
 			{
 				commitment: "finalized",
+				maxRetries: 6,
+				skipPreflight: true,
+				preflightCommitment: "processed",
 			},
 		);
 

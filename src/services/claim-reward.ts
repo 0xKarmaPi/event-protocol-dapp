@@ -100,7 +100,10 @@ export const claimReward = async ({
 			.instruction(),
 	);
 	const result = await program?.provider?.sendAndConfirm?.(transaction, [], {
-		commitment: "finalized",
+		commitment: "confirmed",
+		// maxRetries: 6,
+		// skipPreflight: true,
+		// preflightCommitment: "processed",
 	});
 
 	return result;

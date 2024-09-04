@@ -211,7 +211,7 @@ export default function MyParticipatedEvents() {
 			case "result":
 				if (event.result) {
 					return (
-						<div>
+						<div className="flex items-center gap-2">
 							<ButtonWithdraw refetch={refetch} event={event} />
 							<ButtonClaimReward
 								refetch={refetch}
