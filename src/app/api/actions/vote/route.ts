@@ -133,7 +133,8 @@ export const POST = async (req: Request) => {
 		let wallet = new NodeWallet(new Keypair());
 
 		const provider = new anchor.AnchorProvider(connection, wallet, {
-			commitment: "finalized",
+			commitment: "confirmed",
+			preflightCommitment: "confirmed",
 		});
 		anchor.setProvider(provider);
 

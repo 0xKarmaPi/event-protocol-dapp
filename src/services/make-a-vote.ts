@@ -28,7 +28,7 @@ export const createMakeAVoteTransaction = async ({
 }: CreateMakeAVoteTransaction) => {
 	// create a legacy transaction
 	const { blockhash, lastValidBlockHeight } =
-		await program.provider.connection.getLatestBlockhash();
+		await program.provider.connection.getLatestBlockhash("confirmed");
 
 	const transaction = new Transaction({
 		blockhash,

@@ -8,6 +8,7 @@ import {
 	TOKENS_RIGHT_POOL_SEEDS_PREFIX,
 } from "@/utils/constants";
 import { EventProtocol } from "@/utils/smart-contract/event_protocol";
+import { Transaction } from "@solana/web3.js";
 
 export type Options = {
 	leftMint: web3.PublicKey | null;
@@ -58,7 +59,14 @@ export const createPredictionEvent = async ({
 		program.programId,
 	);
 
-	const transaction = new web3.Transaction();
+	const { blockhash, lastValidBlockHeight } =
+		await program.provider.connection.getLatestBlockhash("confirmed");
+
+	const transaction = new Transaction({
+		blockhash,
+		lastValidBlockHeight,
+		feePayer: userPublicKey,
+	});
 
 	const deployEventIns = await program.methods
 		.deployEvent(
@@ -116,7 +124,8 @@ export const createPredictionEvent = async ({
 	}
 
 	await program?.provider?.sendAndConfirm?.(transaction, [], {
-		commitment: "finalized",
+		commitment: "confirmed",
+		preflightCommitment: "confirmed",
 	});
 
 	return {

@@ -65,6 +65,7 @@ export default function ButtonWithdraw({
 				color="success"
 				variant="bordered"
 				isDisabled
+				className="w-[130px]"
 				startContent={<FaCheck />}
 			>
 				Withdrawn
@@ -78,6 +79,7 @@ export default function ButtonWithdraw({
 			color="warning"
 			variant="flat"
 			startContent={<FaCoins />}
+			className="w-[130px]"
 			isLoading={mutateWithDrawEvent.isPending}
 		>
 			Withdraw

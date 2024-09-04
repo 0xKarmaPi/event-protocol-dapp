@@ -49,7 +49,10 @@ export default function EventDetailForm({
 	const mutateMakeAVote = useMutation({
 		mutationFn: async (variables: CreateMakeAVoteTransaction) => {
 			const tx = await createMakeAVoteTransaction(variables);
-			return program?.provider?.sendAndConfirm?.(tx);
+			return program?.provider?.sendAndConfirm?.(tx, [], {
+				commitment: "confirmed",
+				preflightCommitment: "confirmed",
+			});
 		},
 		mutationKey: ["makeAVote"],
 		onSuccess: (res) => {
