@@ -125,7 +125,7 @@ export const createPredictionEvent = async ({
 
 	await program?.provider?.sendAndConfirm?.(transaction, [], {
 		commitment: "confirmed",
-		preflightCommitment: "confirmed",
+		// preflightCommitment: "confirmed",
 	});
 
 	return {

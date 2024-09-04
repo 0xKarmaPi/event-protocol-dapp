@@ -60,7 +60,9 @@ export default function EventDetailForm({
 			setAmount("0");
 			setSelectedOption(undefined);
 		},
-		onError: () => {
+		onError: (error) => {
+			console.log(error);
+
 			toast("Failed to vote", { type: "error" });
 		},
 	});

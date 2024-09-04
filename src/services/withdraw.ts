@@ -5,7 +5,6 @@ import {
 } from "@/utils/constants";
 import { EventProtocol } from "@/utils/smart-contract/event_protocol";
 import { Program, web3 } from "@coral-xyz/anchor";
-import { program } from "@coral-xyz/anchor/dist/cjs/native/system";
 import { addCreateAtaInsIfNotExist } from "./get-or-create-ata-ins";
 import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -30,7 +29,13 @@ export const withDrawEvent = async ({
 	rightMint,
 	ticket,
 }: WithdrawEventRequest) => {
-	const transaction = new web3.Transaction();
+	const { blockhash, lastValidBlockHeight } =
+		await program.provider.connection.getLatestBlockhash("confirmed");
+	const transaction = new web3.Transaction({
+		blockhash,
+		lastValidBlockHeight,
+		feePayer: signer,
+	});
 
 	const [leftPool] = web3.PublicKey.findProgramAddressSync(
 		[TOKENS_LEFT_POOL_SEEDS_PREFIX, eventId.toBuffer()],
@@ -53,7 +58,6 @@ export const withDrawEvent = async ({
 			[TOKENS_SYSTEM_FEE_SEEDS_PREFIX, leftMint.toBuffer()],
 			program.programId,
 		)[0];
-
 		signerLeftBeneficiaryAta = await addCreateAtaInsIfNotExist(
 			transaction,
 			program.provider.connection,
@@ -76,42 +80,35 @@ export const withDrawEvent = async ({
 			signer,
 		);
 		rightPoolValue = rightPool;
-
-		transaction.add(
-			await program.methods
-				.withdrawDeposited()
-				.accountsStrict({
-					event: eventPubkey,
-
-					leftMint,
-					leftPool: leftPoolValue,
-					signerLeftBeneficiaryAta,
-
-					rightMint,
-					rightPool: rightPoolValue,
-					signerRightBeneficiaryAta,
-
-					ticket,
-
-					signer: signer,
-					systemProgram: web3.SystemProgram.programId,
-					tokenProgram: TOKEN_PROGRAM_ID,
-					associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-				})
-				.instruction(),
-		);
-
-		const result = await program?.provider?.sendAndConfirm?.(
-			transaction,
-			[],
-			{
-				commitment: "finalized",
-				maxRetries: 6,
-				skipPreflight: true,
-				preflightCommitment: "processed",
-			},
-		);
-
-		return result;
 	}
+	transaction.add(
+		await program.methods
+			.withdrawDeposited()
+			.accountsStrict({
+				event: eventPubkey,
+
+				leftMint,
+				leftPool: leftPoolValue,
+				signerLeftBeneficiaryAta,
+
+				rightMint,
+				rightPool: rightPoolValue,
+				signerRightBeneficiaryAta,
+
+				ticket,
+
+				signer: signer,
+				systemProgram: web3.SystemProgram.programId,
+				tokenProgram: TOKEN_PROGRAM_ID,
+				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+			})
+			.instruction(),
+	);
+
+	const result = await program?.provider?.sendAndConfirm?.(transaction, [], {
+		commitment: "confirmed",
+		preflightCommitment: "confirmed",
+	});
+
+	return result;
 };

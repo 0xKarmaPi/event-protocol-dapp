@@ -10,6 +10,7 @@ import {
 	TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { addCreateAtaInsIfNotExist } from "./get-or-create-ata-ins";
+import { Transaction } from "@solana/web3.js";
 
 export const claimReward = async ({
 	signer,
@@ -28,7 +29,14 @@ export const claimReward = async ({
 	rightMint: web3.PublicKey | null;
 	ticket: web3.PublicKey;
 }) => {
-	const transaction = new web3.Transaction();
+	const { blockhash, lastValidBlockHeight } =
+		await program.provider.connection.getLatestBlockhash("confirmed");
+
+	const transaction = new Transaction({
+		blockhash,
+		lastValidBlockHeight,
+		feePayer: signer,
+	});
 
 	const [leftPool] = web3.PublicKey.findProgramAddressSync(
 		[TOKENS_LEFT_POOL_SEEDS_PREFIX, eventId.toBuffer()],
@@ -101,9 +109,7 @@ export const claimReward = async ({
 	);
 	const result = await program?.provider?.sendAndConfirm?.(transaction, [], {
 		commitment: "confirmed",
-		// maxRetries: 6,
-		// skipPreflight: true,
-		// preflightCommitment: "processed",
+		preflightCommitment: "confirmed",
 	});
 
 	return result;

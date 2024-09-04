@@ -8,6 +8,7 @@ import { EventProtocol } from "@/utils/smart-contract/event_protocol";
 import { Program, web3 } from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import { addCreateAtaInsIfNotExist } from "./get-or-create-ata-ins";
+import { Transaction } from "@solana/web3.js";
 
 export const finishEvent = async ({
 	signer,
@@ -26,7 +27,14 @@ export const finishEvent = async ({
 	optionCorrect: "left" | "right";
 	eventPubkey: web3.PublicKey;
 }) => {
-	const transaction = new web3.Transaction();
+	const { blockhash, lastValidBlockHeight } =
+		await program.provider.connection.getLatestBlockhash("confirmed");
+
+	const transaction = new Transaction({
+		blockhash,
+		lastValidBlockHeight,
+		feePayer: signer,
+	});
 
 	const [masterAccount] = web3.PublicKey.findProgramAddressSync(
 		[Buffer.from("master")],
@@ -129,7 +137,7 @@ export const finishEvent = async ({
 		commitment: "confirmed",
 		// maxRetries: 6,
 		// skipPreflight: true,
-		// preflightCommitment: "processed",
+		// preflightCommitment: "finalized",
 	});
 
 	return result;

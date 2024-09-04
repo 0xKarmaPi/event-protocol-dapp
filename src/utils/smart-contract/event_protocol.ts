@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/event_protocol.json`.
  */
 export type EventProtocol = {
-	address: "3QBHFR3hQrqkuHcgFsxoQB4wta7uKQoDHe4Fg8Bk1q8N";
+	address: "9CVFRbxzS1FyVdnGwXYS6HpTvSasaEva8pjtVKtFjvsj";
 	metadata: {
 		name: "eventProtocol";
 		version: "0.1.0";
@@ -26,6 +26,7 @@ export type EventProtocol = {
 				{
 					name: "event";
 					docs: ["The prediction event"];
+					writable: true;
 					pda: {
 						seeds: [
 							{
@@ -724,6 +725,7 @@ export type EventProtocol = {
 				},
 				{
 					name: "master";
+					writable: true;
 					pda: {
 						seeds: [
 							{
@@ -1304,6 +1306,7 @@ export type EventProtocol = {
 				},
 				{
 					name: "event";
+					writable: true;
 					pda: {
 						seeds: [
 							{

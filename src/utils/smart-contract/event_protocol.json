@@ -1,5 +1,5 @@
 {
-  "address": "3QBHFR3hQrqkuHcgFsxoQB4wta7uKQoDHe4Fg8Bk1q8N",
+  "address": "9CVFRbxzS1FyVdnGwXYS6HpTvSasaEva8pjtVKtFjvsj",
   "metadata": {
     "name": "event_protocol",
     "version": "0.1.0",
@@ -33,6 +33,7 @@
           "docs": [
             "The prediction event"
           ],
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -801,6 +802,7 @@
         },
         {
           "name": "master",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -1429,6 +1431,7 @@
         },
         {
           "name": "event",
+          "writable": true,
           "pda": {
             "seeds": [
               {
