@@ -22,6 +22,8 @@ import ButtonClaimReward from "./ButtonClaimReward";
 import { renderMintValue } from "@/utils/common";
 import TooltipCorrectOption from "./TooltipCorrectOption";
 import { web3 } from "@coral-xyz/anchor";
+import ButtonWithdraw from "./ButtonWithdraw";
+import Link from "next/link";
 
 export default function MyParticipatedEvents() {
 	const [page, setPage] = useState(1);
@@ -125,15 +127,21 @@ export default function MyParticipatedEvents() {
 				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
 			case "description":
 				return (
-					<p className="w-[200px]">
-						{event.description}
-						<br />
-						{event.burning && (
-							<span className="text-xs italic text-danger">
-								(*)All token will be burned if you predict wrong
-							</span>
-						)}
-					</p>
+					<Link
+						href={`/prediction-events/${event.id}`}
+						className="hover:text-primary"
+					>
+						<p className="w-[200px]">
+							{event.description}
+							<br />
+							{event.burning && (
+								<span className="text-xs italic text-danger">
+									(*)All token will be burned if you predict
+									wrong
+								</span>
+							)}
+						</p>
+					</Link>
 				);
 			case "options":
 				return (
@@ -201,11 +209,17 @@ export default function MyParticipatedEvents() {
 					</div>
 				);
 			case "result":
-				if (event.burning) return <Button>Token burned</Button>;
-				if (event.result)
+				if (event.result) {
 					return (
-						<ButtonClaimReward refetch={refetch} event={event} />
+						<div>
+							<ButtonWithdraw refetch={refetch} event={event} />
+							<ButtonClaimReward
+								refetch={refetch}
+								event={event}
+							/>
+						</div>
 					);
+				}
 				return <p>Waiting result</p>;
 			default:
 				return getKeyValue(event, columnKey);

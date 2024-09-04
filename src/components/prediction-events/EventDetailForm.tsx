@@ -1,6 +1,6 @@
 "use client";
 
-import { renderMintValue, shortAddress } from "@/utils/common";
+import { renderMintValue } from "@/utils/common";
 import {
 	Card,
 	CardHeader,
@@ -21,12 +21,11 @@ import {
 	CreateMakeAVoteTransaction,
 	createMakeAVoteTransaction,
 } from "@/services/make-a-vote";
-import { Program, web3 } from "@coral-xyz/anchor";
+import { web3 } from "@coral-xyz/anchor";
 import { useAnchor } from "@/hooks/useAnchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
-import { EventProtocol } from "@/utils/smart-contract/event_protocol";
 import { FaCopy } from "react-icons/fa";
 
 export default function EventDetailForm({
@@ -399,6 +398,11 @@ export default function EventDetailForm({
 						Copy Blink
 					</Button>
 				</div>
+				{event?.burning && (
+					<span className="text-sm italic text-danger">
+						(*)All token will be burned if player predict wrong!
+					</span>
+				)}
 			</CardBody>
 			<Divider />
 		</Card>

@@ -127,6 +127,9 @@ export const finishEvent = async ({
 	transaction.add(finishEventInstruction);
 	const result = await program?.provider?.sendAndConfirm?.(transaction, [], {
 		commitment: "finalized",
+		maxRetries: 6,
+		skipPreflight: true,
+		preflightCommitment: "processed",
 	});
 
 	return result;

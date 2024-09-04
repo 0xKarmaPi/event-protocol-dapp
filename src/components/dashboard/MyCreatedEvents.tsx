@@ -21,6 +21,7 @@ import { useState } from "react";
 import SetPredictionResultModal from "./SetPredictionResultModal";
 import TooltipCorrectOption from "./TooltipCorrectOption";
 import ButtonDeleteEvent from "./ButtonDeleteEvent";
+import Link from "next/link";
 
 export default function MyCreatedEvents() {
 	const { publicKey } = useWallet();
@@ -124,16 +125,21 @@ export default function MyCreatedEvents() {
 				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
 			case "description":
 				return (
-					<p className="w-[200px]">
-						{event.description}
-						<br />
-						{event.burning && (
-							<span className="text-xs italic text-danger">
-								(*)All token will be burned if player predict
-								wrong
-							</span>
-						)}
-					</p>
+					<Link
+						href={`/prediction-events/${event.id}`}
+						className="hover:text-primary"
+					>
+						<p className="w-[200px]">
+							{event.description}
+							<br />
+							{event.burning && (
+								<span className="text-xs italic text-danger">
+									(*)All token will be burned if player
+									predict wrong
+								</span>
+							)}
+						</p>
+					</Link>
 				);
 			case "options":
 				return (

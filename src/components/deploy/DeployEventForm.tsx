@@ -9,11 +9,11 @@ import {
 	CardFooter,
 	Button,
 	DateValue,
+	Checkbox,
 } from "@nextui-org/react";
 import OptionSetup from "./OptionSetup";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { parseDateTime } from "@internationalized/date";
-import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useDeployEventStore } from "@/stores/deployEventStore";
@@ -27,6 +27,7 @@ type EventInputs = {
 	description: string;
 	endDate: DateValue;
 	startDate: DateValue;
+	burning: boolean;
 };
 const LIMIT_DESCRIPTION = 144;
 
@@ -50,7 +51,6 @@ export default function DeployEventForm() {
 		mutationFn: createPredictionEvent,
 		onError: (error) => {
 			console.log(error);
-
 			toast("Deploy event failed", { type: "error" });
 		},
 		onSuccess: () => {
@@ -89,6 +89,7 @@ export default function DeployEventForm() {
 					rightDescription,
 					leftMint,
 					rightMint,
+					burning: data.burning,
 				},
 				program,
 				userPublicKey,
@@ -187,13 +188,22 @@ export default function DeployEventForm() {
 							)}
 						/>
 					</div>
-				</CardBody>
-				<CardFooter className="flex flex-col gap-2">
-					<p className="mx-4 mb-4 text-left text-xs italic text-yellow-500">
+					<Checkbox {...register("burning")}>
+						Burns losing side tokens <br />
+					</Checkbox>
+					{watch("burning") && (
+						<p className="mx-4 text-left text-xs italic text-danger">
+							* All tokens will be burned if player predict wrong
+						</p>
+					)}
+
+					<p className="mx-4 text-left text-xs italic text-yellow-500">
 						* As the creator of this event, you will receive a 2.5%
 						fee from the total tokens involved in the prediction
 						event.
 					</p>
+				</CardBody>
+				<CardFooter className="flex flex-col gap-2">
 					<div className="flex w-full flex-row gap-2">
 						<Button
 							className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
