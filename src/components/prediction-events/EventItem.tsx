@@ -11,27 +11,11 @@ import {
 import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "react-toastify";
 
 type EventItemProps = {
 	event: IEvent;
 };
 export default function EventItem({ event }: EventItemProps) {
-	const handleCopyBlink = () => {
-		const blink = new URL(
-			`/api/actions/vote?eventId=${event.id}`,
-			window.location.origin,
-		).toString();
-		navigator.clipboard
-			.writeText(blink)
-			.then(() => {
-				toast.success("Copied to clipboard");
-			})
-			.catch(() => {
-				toast.error("Failed to copy");
-			});
-	};
-
 	const renderStatusLabel = (event: IEvent) => {
 		const now = dayjs();
 		const startDate = dayjs(event.start_date);

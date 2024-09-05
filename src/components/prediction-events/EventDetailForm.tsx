@@ -1,6 +1,6 @@
 "use client";
 
-import { renderMintValue } from "@/utils/common";
+import { generateBlink, renderMintValue } from "@/utils/common";
 import {
 	Card,
 	CardHeader,
@@ -42,7 +42,10 @@ export default function EventDetailForm({
 	>();
 	const [amount, setAmount] = useState<string>("0");
 	const [balanceTokenVote, setBalanceTokenVote] = useState(0);
-
+	const [voteAmount, setVoteAmount] = useState({
+		leftPool: 0,
+		rightPool: 0,
+	});
 	const { program } = useAnchor();
 	const { publicKey } = useWallet();
 
@@ -55,14 +58,13 @@ export default function EventDetailForm({
 			});
 		},
 		mutationKey: ["makeAVote"],
-		onSuccess: (res) => {
+		onSuccess: () => {
 			toast("Voted successfully", { type: "success" });
 			setAmount("0");
 			setSelectedOption(undefined);
 		},
 		onError: (error) => {
 			console.log(error);
-
 			toast("Failed to vote", { type: "error" });
 		},
 	});
@@ -172,10 +174,11 @@ export default function EventDetailForm({
 	}, [event]);
 
 	const handleCopyBlink = () => {
-		const blink = new URL(
+		const actionUrl = new URL(
 			`/api/actions/vote?eventId=${event?.id}`,
 			window.location.origin,
 		).toString();
+		const blink = generateBlink(actionUrl);
 		navigator.clipboard
 			.writeText(blink)
 			.then(() => {
@@ -185,6 +188,28 @@ export default function EventDetailForm({
 				toast.error("Failed to copy");
 			});
 	};
+
+	const fetchVoteAmount = useCallback(async () => {
+		if (program) {
+			const predictionEventSC =
+				await program.account.predictionEvent.fetch(
+					new web3.PublicKey(event?.pubkey!),
+				);
+			setVoteAmount({
+				leftPool:
+					(predictionEventSC?.leftPool?.toNumber() || 0) /
+					10 ** (event?.left_mint_decimals ?? 9),
+				rightPool:
+					(predictionEventSC?.rightPool?.toNumber() || 0) /
+					10 ** (event?.right_mint_decimals ?? 9),
+			});
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [event?.pubkey]);
+
+	useEffect(() => {
+		fetchVoteAmount();
+	}, [event, fetchVoteAmount]);
 
 	useEffect(() => {
 		if (publicKey && event) fetchTokenBalance();
@@ -312,6 +337,13 @@ export default function EventDetailForm({
 								{renderMintValue(event.left_mint)}
 							</div>
 						</div>
+						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
+							Vote amount:
+							<div className="flex">
+								{voteAmount.leftPool}{" "}
+								{renderMintValue(event.left_mint)}
+							</div>
+						</div>
 					</div>
 					<div className="flex flex-col items-center gap-2">
 						<div className="text-lg font-semibold">
@@ -322,6 +354,13 @@ export default function EventDetailForm({
 						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
 							Accept:
 							<div className="flex">
+								{renderMintValue(event.right_mint)}
+							</div>
+						</div>
+						<div className="flex flex-col items-center gap-1 text-white/80 md:flex-row">
+							Vote amount:
+							<div className="flex">
+								{voteAmount.rightPool}{" "}
 								{renderMintValue(event.right_mint)}
 							</div>
 						</div>

@@ -30,3 +30,8 @@ export const renderMintValue = (mint?: string) => {
 		return "$EVENT";
 	return shortAddress(mint);
 };
+
+export const generateBlink = (actionUrl: string) => {
+	const encodedUrl = encodeURIComponent(`solana-action:${actionUrl}`);
+	return `https://dial.to/?action=${encodedUrl}`;
+};
