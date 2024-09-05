@@ -14,43 +14,48 @@ import { useWallet } from "@solana/wallet-adapter-react";
 
 export default function MyBalance() {
 	const { program } = useAnchor();
-	const {publicKey} = useWallet();
+	const { publicKey } = useWallet();
 
 	const [myBalance, setMyBalance] = useState({
 		sol: 0,
 		event: 0,
 	});
 
-	useEffect(() => {
-		fetchBalance().then((balance) => setMyBalance(balance));
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [publicKey]);
-
 	const fetchBalance = useCallback(async () => {
 		const solBalance = await program.provider.connection.getBalance(
 			program.provider.publicKey!,
 		);
+		try {
+			// Fetch EVENT TOKEN balance
+			const associatedToken = await getAssociatedTokenAddress(
+				new web3.PublicKey(
+					process.env.NEXT_PUBLIC_EVENT_TOKEN_MINT_ADDRESS!,
+				),
+				program.provider.publicKey!,
+			);
 
-		// Fetch EVENT TOKEN balance
-		const associatedToken = await getAssociatedTokenAddress(
-			new web3.PublicKey(
-				process.env.NEXT_PUBLIC_EVENT_TOKEN_MINT_ADDRESS!,
-			),
-			program.provider.publicKey!,
-		);
+			const account = await getAccount(
+				program.provider.connection,
+				associatedToken,
+			);
+			const eventTokenBalance =
+				Number(account.amount) / EVENT_TOKEN_DECIMAL;
 
-		const account = await getAccount(
-			program.provider.connection,
-			associatedToken,
-		);
-		const eventTokenBalance = Number(account.amount) / EVENT_TOKEN_DECIMAL;
-
-		return {
-			sol: solBalance / web3.LAMPORTS_PER_SOL,
-			event: eventTokenBalance,
-		};
+			return {
+				sol: solBalance / web3.LAMPORTS_PER_SOL,
+				event: eventTokenBalance,
+			};
+		} catch (error) {
+			return {
+				sol: solBalance / web3.LAMPORTS_PER_SOL,
+				event: 0,
+			};
+		}
 	}, [program.provider.connection, program.provider.publicKey]);
 
+	useEffect(() => {
+		fetchBalance().then((balance) => setMyBalance(balance));
+	}, [publicKey, fetchBalance]);
 	return (
 		<BorderGradient className="h-full rounded-lg p-0.5">
 			<div className="rounded-lg bg-gradient-to-tr from-blue-900 to-purple-400 px-4 py-4">
