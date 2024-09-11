@@ -4,15 +4,31 @@ import {
 	WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+import {
+	PhantomWalletAdapter,
+	NightlyWalletAdapter,
+} from "@solana/wallet-adapter-wallets";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { web3 } from "@coral-xyz/anchor";
-
-export const endpoint = web3.clusterApiUrl("devnet");
-export const connection = new web3.Connection(endpoint);
+import { useUserStore } from "@/stores/userStore";
 
 const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-	const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
+	const wallets = useMemo(
+		() => [new PhantomWalletAdapter(), new NightlyWalletAdapter()],
+		[],
+	);
+
+	const { network } = useUserStore();
+	const endpoint = useMemo(() => {
+		switch (network) {
+			case "solana":
+				return web3.clusterApiUrl("devnet");
+			case "sonic":
+				return "https://devnet.sonic.game";
+			default:
+				return web3.clusterApiUrl("devnet");
+		}
+	}, [network]);
 
 	return (
 		<ConnectionProvider endpoint={endpoint}>

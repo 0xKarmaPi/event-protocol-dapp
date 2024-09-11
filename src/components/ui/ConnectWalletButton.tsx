@@ -9,12 +9,14 @@ import {
 	DropdownTrigger,
 } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import { shortAddress } from "@/utils/common";
 import Image from "next/image";
 import sol from "/public/assets/solana.png";
+import nightly from "/public/assets/nightly.png";
 import phantom from "/public/assets/phantom-icon.png";
+import sonic from "/public/assets/sonic.png";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { FiLogOut, FiUser } from "react-icons/fi";
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
@@ -22,12 +24,14 @@ import { COOKIES } from "@/utils/constants";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useUserStore } from "@/stores/userStore";
 
 export default function ConnectWalletButton() {
 	const session = useSession();
 	const router = useRouter();
 	const { signMessage, publicKey, connected, disconnect } = useWallet();
-	const modalSellectWallet = useWalletModal();
+	const modalSelectWallet = useWalletModal();
+	const { updateNetwork, network } = useUserStore();
 
 	const mutateSignIn = useMutation({
 		mutationFn: signInService,
@@ -79,8 +83,64 @@ export default function ConnectWalletButton() {
 	};
 
 	const handleClickConnectWallet = async () => {
-		modalSellectWallet.setVisible(true);
+		modalSelectWallet.setVisible(true);
 	};
+
+	const renderIconWallet = useMemo(() => {
+		if (connected) {
+			const selectedWallet = localStorage?.getItem("walletName");
+			switch (selectedWallet?.toLowerCase()) {
+				case `"phantom"`:
+					return (
+						<Image src={phantom} alt="sol" width={20} height={20} />
+					);
+				case `"nightly"`:
+					return (
+						<Image
+							src={nightly}
+							alt="nightly"
+							width={20}
+							height={20}
+							className="rounded-full"
+						/>
+					);
+			}
+		}
+	}, [connected]);
+
+	const renderIconNetwork = useMemo(() => {
+		if (connected) {
+			switch (network) {
+				case "solana":
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={sol}
+								alt="sol"
+								width={20}
+								height={20}
+								className="rounded-full"
+							/>
+							<span>Solana</span>
+						</div>
+					);
+				case "sonic":
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={sonic}
+								alt="sonic"
+								width={20}
+								height={20}
+								className="rounded-full"
+							/>
+							<span>Sonic</span>
+						</div>
+					);
+			}
+		}
+	}, [connected, network]);
+
 	useEffect(() => {
 		if (publicKey && connected) {
 			const accessToken = getCookie(COOKIES.ACCESSTOKEN);
@@ -94,50 +154,87 @@ export default function ConnectWalletButton() {
 
 	if (session.data?.user) {
 		return (
-			<Dropdown className="text-white">
-				<DropdownTrigger>
-					<Button
-						className="bg-white/90 text-black"
-						startContent={
-							<div className="flex items-center gap-1">
+			<div className="flex items-center gap-2">
+				{/* Select Network */}
+				<Dropdown className="!w-[100px] text-white">
+					<DropdownTrigger>
+						<Button
+							className="bg-white/90 text-black"
+							startContent={
+								<div className="flex items-center gap-1">
+									{renderIconNetwork}
+								</div>
+							}
+						></Button>
+					</DropdownTrigger>
+					<DropdownMenu>
+						<DropdownItem
+							onClick={() => updateNetwork("solana")}
+							key="solana"
+							startContent={
 								<Image
 									src={sol}
 									alt="sol"
 									width={20}
 									height={20}
-								/>{" "}
-								<span className="text-xs">Solana</span>
+									className="rounded-full"
+								/>
+							}
+						>
+							Solana
+						</DropdownItem>
+						<DropdownItem
+							key="sonic"
+							onClick={() => updateNetwork("sonic")}
+							startContent={
 								<Image
-									src={phantom}
-									alt="sol"
+									src={sonic}
+									alt="sonic"
 									width={20}
 									height={20}
-								/>{" "}
-							</div>
-						}
-					>
-						{shortAddress(publicKey?.toString()!)}
-					</Button>
-				</DropdownTrigger>
-				<DropdownMenu>
-					<DropdownItem
-						onClick={handleClickProfile}
-						key="myProfile"
-						startContent={<FiUser />}
-					>
-						My Profile
-					</DropdownItem>
-					<DropdownItem
-						onClick={handleDisconnect}
-						key="disconnect"
-						className="text-danger"
-						color="danger"
-						startContent={<FiLogOut />}
-					>
-						Disconnect
-					</DropdownItem>
-				</DropdownMenu>
-			</Dropdown>
+									className="rounded-full"
+								/>
+							}
+						>
+							Sonic
+						</DropdownItem>
+					</DropdownMenu>
+				</Dropdown>
+
+				{/* Account Info */}
+				<Dropdown className="text-white">
+					<DropdownTrigger>
+						<Button
+							className="bg-white/90 text-black"
+							startContent={
+								<div className="flex items-center gap-1">
+									{renderIconWallet}
+								</div>
+							}
+						>
+							{shortAddress(publicKey?.toString()!)}
+						</Button>
+					</DropdownTrigger>
+					<DropdownMenu>
+						<DropdownItem
+							onClick={handleClickProfile}
+							key="myProfile"
+							startContent={<FiUser />}
+						>
+							My Profile
+						</DropdownItem>
+						<DropdownItem
+							onClick={handleDisconnect}
+							key="disconnect"
+							className="text-danger"
+							color="danger"
+							startContent={<FiLogOut />}
+						>
+							Disconnect
+						</DropdownItem>
+					</DropdownMenu>
+				</Dropdown>
+			</div>
 		);
 	}
 
