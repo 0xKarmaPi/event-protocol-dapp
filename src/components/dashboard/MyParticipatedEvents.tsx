@@ -11,7 +11,6 @@ import {
 	getKeyValue,
 	Chip,
 	Pagination,
-	Button,
 } from "@nextui-org/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +23,7 @@ import TooltipCorrectOption from "./TooltipCorrectOption";
 import { web3 } from "@coral-xyz/anchor";
 import ButtonWithdraw from "./ButtonWithdraw";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function MyParticipatedEvents() {
 	const [page, setPage] = useState(1);
@@ -37,6 +37,10 @@ export default function MyParticipatedEvents() {
 		{
 			key: "description",
 			label: "DESCRIPTION",
+		},
+		{
+			key: "network",
+			label: "NETWORK",
 		},
 		{
 			key: "options",
@@ -125,6 +129,34 @@ export default function MyParticipatedEvents() {
 		switch (columnKey) {
 			case "index":
 				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
+			case "network":
+				if (event.network === "Solana") {
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={"/assets/solana.png"}
+								alt="Solana"
+								width={24}
+								height={24}
+							/>{" "}
+							<span>Solana</span>
+						</div>
+					);
+				}
+				if (event.network === "Sonic") {
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={"/assets/sonic.png"}
+								alt="Solana"
+								width={24}
+								height={24}
+							/>{" "}
+							<span>Sonic</span>
+						</div>
+					);
+				}
+				break;
 			case "description":
 				return (
 					<Link

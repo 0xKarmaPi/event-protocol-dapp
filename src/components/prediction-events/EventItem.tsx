@@ -1,3 +1,4 @@
+import { useUserStore } from "@/stores/userStore";
 import { IEvent } from "@/types/event";
 import { renderMintValue } from "@/utils/common";
 import {
@@ -93,7 +94,7 @@ export default function EventItem({ event }: EventItemProps) {
 				);
 		}
 	}, [event.network]);
-
+	const { updateNetwork } = useUserStore();
 	return (
 		<Card key={event.id} className="h-full md:min-w-[150px]">
 			<CardHeader>
@@ -149,7 +150,14 @@ export default function EventItem({ event }: EventItemProps) {
 				</div>
 				<div className="flex gap-1">
 					<Link href={`/prediction-events/${event.id}`}>
-						<Button className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg">
+						<Button
+							onClick={() =>
+								updateNetwork(
+									event.network.toLowerCase() as any,
+								)
+							}
+							className="bg-gradient-to-tr from-primary to-purple-400 text-white shadow-lg"
+						>
 							View Detail
 						</Button>
 					</Link>

@@ -22,10 +22,13 @@ import SetPredictionResultModal from "./SetPredictionResultModal";
 import TooltipCorrectOption from "./TooltipCorrectOption";
 import ButtonDeleteEvent from "./ButtonDeleteEvent";
 import Link from "next/link";
+import Image from "next/image";
+import { useUserStore } from "@/stores/userStore";
 
 export default function MyCreatedEvents() {
 	const { publicKey } = useWallet();
 	const [page, setPage] = useState(1);
+	const { updateNetwork } = useUserStore();
 
 	const columns = [
 		{
@@ -36,7 +39,10 @@ export default function MyCreatedEvents() {
 			key: "description",
 			label: "DESCRIPTION",
 		},
-
+		{
+			key: "network",
+			label: "NETWORK",
+		},
 		{
 			key: "options",
 			label: "OPTIONS",
@@ -123,11 +129,42 @@ export default function MyCreatedEvents() {
 		switch (columnKey) {
 			case "index":
 				return index + 1 + (page - 1) * PAGE_SIZE_DEFAULT;
+			case "network":
+				if (event.network === "Solana") {
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={"/assets/solana.png"}
+								alt="Solana"
+								width={24}
+								height={24}
+							/>{" "}
+							<span>Solana</span>
+						</div>
+					);
+				}
+				if (event.network === "Sonic") {
+					return (
+						<div className="flex items-center gap-1">
+							<Image
+								src={"/assets/sonic.png"}
+								alt="Solana"
+								width={24}
+								height={24}
+							/>{" "}
+							<span>Sonic</span>
+						</div>
+					);
+				}
+				break;
 			case "description":
 				return (
 					<Link
 						href={`/prediction-events/${event.id}`}
 						className="hover:text-primary"
+						onClick={() => {
+							updateNetwork(event.network.toLowerCase() as any);
+						}}
 					>
 						<p className="w-[200px]">
 							{event.description}
