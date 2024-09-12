@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import { NextUIProvider } from "@nextui-org/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WalletContextProvider from "./WalletContextProvider";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ export default function AppProvider({
 					<WalletContextProvider>
 						<main>{children}</main>
 					</WalletContextProvider>
+					<ReactQueryDevtools initialIsOpen={false} />
 				</QueryClientProvider>
 			</SessionProvider>
 		</NextUIProvider>

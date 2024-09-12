@@ -1,5 +1,6 @@
 import { IUser } from "@/types/user";
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface UserState {
 	user: IUser | null;
@@ -11,9 +12,20 @@ interface ActionUser {
 	updateNetwork: (network: "solana" | "sonic") => void;
 }
 
-export const useUserStore = create<UserState & ActionUser>((set) => ({
-	user: null,
-	network: "solana",
-	updateUser: (user) => set(() => ({ user })),
-	updateNetwork: (network) => set(() => ({ network })),
-}));
+export const useUserStore = create<
+	UserState & ActionUser,
+	[["zustand/persist", UserState]]
+>(
+	persist(
+		(set) => ({
+			user: null,
+			network: "solana",
+			updateUser: (user) => set(() => ({ user })),
+			updateNetwork: (network) => set(() => ({ network })),
+		}),
+		{
+			name: "user-store",
+			storage: createJSONStorage(() => localStorage),
+		},
+	),
+);

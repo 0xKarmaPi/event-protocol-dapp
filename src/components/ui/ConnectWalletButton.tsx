@@ -119,7 +119,7 @@ export default function ConnectWalletButton() {
 								alt="sol"
 								width={20}
 								height={20}
-								className="rounded-full"
+								className="hidden rounded-full md:block"
 							/>
 							<span>Solana</span>
 						</div>
@@ -132,7 +132,7 @@ export default function ConnectWalletButton() {
 								alt="sonic"
 								width={20}
 								height={20}
-								className="rounded-full"
+								className="hidden rounded-full md:block"
 							/>
 							<span>Sonic</span>
 						</div>

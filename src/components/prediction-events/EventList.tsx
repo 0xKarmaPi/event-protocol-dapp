@@ -3,17 +3,25 @@
 import EventItem from "./EventItem";
 import { useQuery } from "@tanstack/react-query";
 import { getEvents } from "@/services/event";
-import { Card, Skeleton } from "@nextui-org/react";
+import { Card, Pagination, Skeleton } from "@nextui-org/react";
+import { useMemo, useState } from "react";
+
+const PAGE_SIZE = 15;
 
 export default function EventList() {
+	const [page, setPage] = useState(1);
 	const { data: events, isPending } = useQuery({
-		queryKey: ["events"],
+		queryKey: ["events", page],
 		queryFn: () =>
 			getEvents({
-				limit: 15,
-				page: 1,
+				limit: PAGE_SIZE,
+				page,
 			}),
 	});
+	const totalPages = useMemo(() => {
+		return Math.ceil((events?.total || 0) / PAGE_SIZE);
+	}, [events?.total]);
+
 	if (isPending)
 		return (
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -41,10 +49,20 @@ export default function EventList() {
 		);
 
 	return (
-		<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-			{events?.nodes?.map((event) => (
-				<EventItem key={event.id} event={event} />
-			))}
-		</div>
+		<>
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{events?.nodes?.map((event, index) => (
+					<EventItem key={index} event={event} />
+				))}
+			</div>
+			<div className="mt-4 flex justify-center">
+				<Pagination
+					onChange={setPage}
+					page={page}
+					total={totalPages}
+					showControls
+				/>
+			</div>
+		</>
 	);
 }

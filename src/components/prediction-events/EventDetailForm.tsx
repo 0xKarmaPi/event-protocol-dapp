@@ -27,6 +27,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 import { FaCopy } from "react-icons/fa";
+import { useUserStore } from "@/stores/userStore";
 
 export default function EventDetailForm({
 	event,
@@ -48,6 +49,7 @@ export default function EventDetailForm({
 	});
 	const { program } = useAnchor();
 	const { publicKey } = useWallet();
+	const { network } = useUserStore();
 
 	const mutateMakeAVote = useMutation({
 		mutationFn: async (variables: CreateMakeAVoteTransaction) => {
@@ -175,7 +177,7 @@ export default function EventDetailForm({
 
 	const handleCopyBlink = () => {
 		const actionUrl = new URL(
-			`/api/actions/vote?eventId=${event?.id}`,
+			`/api/actions/vote?eventId=${event?.id}&network=${network}`,
 			window.location.origin,
 		).toString();
 		const blink = generateBlink(actionUrl);
@@ -266,6 +268,31 @@ export default function EventDetailForm({
 			</div>
 		);
 	};
+	const renderNetworkIcon = useMemo(() => {
+		switch (event?.network?.toLowerCase()) {
+			case "solana":
+				return (
+					<Image
+						alt="logo"
+						height={40}
+						src={"/assets/solana.png"}
+						width={40}
+						className="h-10 w-10 rounded-full"
+					/>
+				);
+
+			case "sonic":
+				return (
+					<Image
+						alt="logo"
+						height={40}
+						src={"/assets/sonic.png"}
+						width={40}
+						className="h-10 w-10 rounded-full"
+					/>
+				);
+		}
+	}, [event?.network]);
 
 	if (isPending) {
 		return (
@@ -297,21 +324,23 @@ export default function EventDetailForm({
 		);
 	}
 	if (isError || !event)
-		return <p className="text-white">Prediction Event not found!</p>;
+		return (
+			<p className="text-center text-white">
+				Prediction Event not found! <br />
+				Please try again by refreshing or select other network.
+			</p>
+		);
 	return (
 		<Card className="w-full md:w-[600px] md:min-w-[600px]">
 			<CardHeader className="flex flex-col gap-3">
 				<div className="flex w-full gap-3">
-					<Image
-						alt="logo"
-						height={40}
-						src={"/assets/logo.png"}
-						className="h-10 w-10 rounded-full"
-						width={40}
-					/>
+					{renderNetworkIcon}
 					<div className="flex flex-col">
 						<p className="text-md text-primary">
-							Eventprotocol Battle
+							Eventprotocol <br />
+							<span className="text-sm capitalize text-white">
+								{event.network}
+							</span>
 						</p>
 					</div>
 					<div className="ml-auto text-right">

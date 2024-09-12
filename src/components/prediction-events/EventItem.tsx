@@ -11,12 +11,13 @@ import {
 import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
 
 type EventItemProps = {
 	event: IEvent;
 };
 export default function EventItem({ event }: EventItemProps) {
-	const renderStatusLabel = (event: IEvent) => {
+	const renderStatusLabel = useMemo(() => {
 		const now = dayjs();
 		const startDate = dayjs(event.start_date);
 		const endDate = dayjs(event.end_date);
@@ -65,27 +66,51 @@ export default function EventItem({ event }: EventItemProps) {
 				<p>To: {dayjs(event.end_date).format("DD MMM YYYY-HH:mm A")}</p>
 			</div>
 		);
-	};
+	}, [event]);
+
+	const renderNetworkIcon = useMemo(() => {
+		switch (event.network?.toLowerCase()) {
+			case "solana":
+				return (
+					<Image
+						alt="logo"
+						height={40}
+						src={"/assets/solana.png"}
+						width={40}
+						className="rounded-full"
+					/>
+				);
+
+			case "sonic":
+				return (
+					<Image
+						alt="logo"
+						height={40}
+						src={"/assets/sonic.png"}
+						width={40}
+						className="rounded-full"
+					/>
+				);
+		}
+	}, [event.network]);
+
 	return (
 		<Card key={event.id} className="h-full md:min-w-[150px]">
 			<CardHeader>
 				<div className="flex w-full items-start justify-between">
 					<div className="flex items-center gap-2">
-						<Image
-							alt="logo"
-							height={40}
-							src={"/assets/logo.png"}
-							width={40}
-							className="rounded-full"
-						/>
+						{renderNetworkIcon}
 						<div className="flex flex-col">
 							<p className="text-md text-primary">
-								Eventprotocol
+								Eventprotocol <br />
+								<span className="text-sm capitalize text-white">
+									{event.network}
+								</span>
 							</p>
 						</div>
 					</div>
 					<div className="w-1/2 text-right text-xs">
-						{renderStatusLabel(event)}
+						{renderStatusLabel}
 					</div>
 				</div>
 			</CardHeader>

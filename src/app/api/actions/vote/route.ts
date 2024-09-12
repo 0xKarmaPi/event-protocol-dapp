@@ -1,7 +1,4 @@
 import { web3 } from "@coral-xyz/anchor";
-/**
- * Solana Actions Example
- */
 import * as anchor from "@coral-xyz/anchor";
 import {
 	ActionPostResponse,
@@ -26,15 +23,15 @@ export const GET = async (req: Request) => {
 	try {
 		const requestUrl = new URL(req.url);
 		const eventId = requestUrl.searchParams.get("eventId");
-
+		const network = requestUrl.searchParams.get("network");
 		const baseHref = new URL(
-			`/api/actions/vote?eventId=${eventId}`,
+			`/api/actions/vote?eventId=${eventId}&network=${network}`,
 			requestUrl.origin,
 		).toString();
 
 		// Fetch event detail
 		const eventDetail: IEvent = await fetch(
-			`${process.env.NEXT_PUBLIC_BASE_URL}/events/${eventId}`,
+			`${process.env.NEXT_PUBLIC_BASE_URL}/events/${network}/${eventId}`,
 		).then((res) => res.json());
 		if (!eventDetail) throw "Event not found";
 
@@ -101,6 +98,7 @@ export const POST = async (req: Request) => {
 	try {
 		const requestUrl = new URL(req.url);
 		const eventId = requestUrl.searchParams.get("eventId");
+		const network = requestUrl.searchParams.get("network");
 		const selection = requestUrl.searchParams.get("selection") as
 			| "left"
 			| "right";
@@ -115,7 +113,7 @@ export const POST = async (req: Request) => {
 
 		// Fetch event detail
 		const eventDetail: IEvent = await fetch(
-			`${process.env.NEXT_PUBLIC_BASE_URL}/events/${eventId}`,
+			`${process.env.NEXT_PUBLIC_BASE_URL}/events/${network}/${eventId}`,
 		).then((res) => res.json());
 
 		if (!eventDetail) {
@@ -128,7 +126,10 @@ export const POST = async (req: Request) => {
 			);
 		}
 
-		const connection = new Connection(clusterApiUrl("devnet"));
+		const connection =
+			network === "solana"
+				? new Connection(clusterApiUrl("devnet"))
+				: new Connection("https://devnet.sonic.game");
 
 		let wallet = new NodeWallet(new Keypair());
 

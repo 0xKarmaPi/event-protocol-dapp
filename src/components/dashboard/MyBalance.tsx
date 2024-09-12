@@ -11,18 +11,19 @@ import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 import { formatPrice } from "@/utils/common";
 import { EVENT_TOKEN_DECIMAL } from "@/utils/constants";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useUserStore } from "@/stores/userStore";
 
 export default function MyBalance() {
 	const { program } = useAnchor();
 	const { publicKey } = useWallet();
-
+	const { network } = useUserStore();
 	const [myBalance, setMyBalance] = useState({
 		sol: 0,
 		event: 0,
 	});
 
-	const fetchBalance = useCallback(async () => {
-		const solBalance = await program.provider.connection.getBalance(
+	const fetchBalance = async () => {
+		const solBalance = await program?.provider?.connection?.getBalance(
 			program.provider.publicKey!,
 		);
 		try {
@@ -51,11 +52,13 @@ export default function MyBalance() {
 				event: 0,
 			};
 		}
-	}, [program.provider.connection, program.provider.publicKey]);
+	};
 
 	useEffect(() => {
 		fetchBalance().then((balance) => setMyBalance(balance));
-	}, [publicKey, fetchBalance]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [publicKey, network]);
+
 	return (
 		<BorderGradient className="h-full rounded-lg p-0.5">
 			<div className="rounded-lg bg-gradient-to-tr from-blue-900 to-purple-400 px-4 py-4">

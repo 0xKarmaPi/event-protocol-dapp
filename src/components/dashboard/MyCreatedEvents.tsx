@@ -242,7 +242,7 @@ export default function MyCreatedEvents() {
 				emptyContent={"No rows to display."}
 			>
 				{(createdEvents?.nodes ?? [])?.map((item, index) => (
-					<TableRow key={item.id}>
+					<TableRow key={index}>
 						{(columnKey) => (
 							<TableCell>
 								{renderCellValue(

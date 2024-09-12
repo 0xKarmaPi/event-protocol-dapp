@@ -10,7 +10,10 @@ export const getEvents = async (
 	return res.data;
 };
 
-export const getEvent = async (id: string): Promise<IEvent> => {
-	const res = await AXIOS.get(`/events/${id}`);
+export const getEvent = async (
+	id: string,
+	network: "solana" | "sonic",
+): Promise<IEvent> => {
+	const res = await AXIOS.get(`/events/${network}/${id}`);
 	return res.data;
 };

@@ -16,6 +16,7 @@ export interface IEvent {
 	tickets?: Array<EventTicket>;
 	left_mint_decimals?: number;
 	right_mint_decimals?: number;
+	network: "Solana" | "Sonic";
 }
 
 export interface EventTicket {

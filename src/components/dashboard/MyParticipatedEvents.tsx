@@ -256,7 +256,7 @@ export default function MyParticipatedEvents() {
 				emptyContent={"No rows to display."}
 			>
 				{(participatedEvents?.nodes ?? [])?.map((item, index) => (
-					<TableRow key={item.id}>
+					<TableRow key={index}>
 						{(columnKey) => (
 							<TableCell>
 								{renderCellValue(
