@@ -277,7 +277,7 @@ export default function EventDetailForm({
 						height={40}
 						src={"/assets/solana.png"}
 						width={40}
-						className="h-10 w-10 rounded-full"
+						className="h-8 w-8 rounded-full"
 					/>
 				);
 
@@ -288,7 +288,7 @@ export default function EventDetailForm({
 						height={40}
 						src={"/assets/sonic.png"}
 						width={40}
-						className="h-10 w-10 rounded-full"
+						className="h-8 w-8 rounded-full"
 					/>
 				);
 		}
@@ -296,7 +296,7 @@ export default function EventDetailForm({
 
 	if (isPending) {
 		return (
-			<Card className="w-[600px] space-y-5 p-4" radius="lg">
+			<Card className="w-full space-y-5 p-4 md:w-[600px]" radius="lg">
 				<Skeleton className="rounded-lg">
 					<div className="h-[300px] rounded-lg bg-default-300"></div>
 				</Skeleton>
@@ -333,10 +333,10 @@ export default function EventDetailForm({
 	return (
 		<Card className="w-full md:w-[600px] md:min-w-[600px]">
 			<CardHeader className="flex flex-col gap-3">
-				<div className="flex w-full gap-3">
+				<div className="flex w-full gap-1">
 					{renderNetworkIcon}
 					<div className="flex flex-col">
-						<p className="text-md text-primary">
+						<p className="text-sm text-primary">
 							Eventprotocol <br />
 							<span className="text-sm capitalize text-white">
 								{event.network}
@@ -443,7 +443,7 @@ export default function EventDetailForm({
 					/>
 				</div>
 
-				<div className="grid grid-cols-4 gap-4">
+				<div className="grid grid-cols-4 gap-2">
 					<Button
 						isDisabled={
 							!selectedOption ||
@@ -452,7 +452,7 @@ export default function EventDetailForm({
 							isEventUpcomming
 						}
 						isLoading={mutateMakeAVote.isPending}
-						className="col-span-3 bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
+						className="col-span-2 bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg md:col-span-3"
 						fullWidth
 						onClick={handleClickSubmit}
 					>
@@ -465,7 +465,7 @@ export default function EventDetailForm({
 					<Button
 						isDisabled={isEventEnded || isEventUpcomming}
 						startContent={<FaCopy />}
-						className="bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg"
+						className="col-span-2 bg-gradient-to-tr from-primary to-purple-500 text-white shadow-lg md:col-span-1"
 						onPress={handleCopyBlink}
 					>
 						Copy Blink

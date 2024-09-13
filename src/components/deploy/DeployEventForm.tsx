@@ -139,7 +139,7 @@ export default function DeployEventForm() {
 						<OptionSetup optionName="Option B" isLeft={false} />
 					</div>
 					<div className="mt-6 text-left font-bold">Time setup</div>
-					<div className="z-50 flex w-full items-start gap-3">
+					<div className="z-50 flex w-full flex-col items-start gap-3 md:flex-row">
 						<Controller
 							control={control}
 							name="startDate"

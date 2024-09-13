@@ -29,9 +29,7 @@ export default function EventItem({ event }: EventItemProps) {
 					<Chip color="default">Upcomming</Chip>
 					<p>
 						From:{" "}
-						{dayjs(event.start_date).format(
-							"DD MMM YYYY - HH:mm A",
-						)}
+						{dayjs(event.start_date).format("DD MMM YYYY-HH:mm A")}
 					</p>
 					<p>
 						To:{" "}
@@ -75,9 +73,9 @@ export default function EventItem({ event }: EventItemProps) {
 				return (
 					<Image
 						alt="logo"
-						height={40}
+						height={32}
 						src={"/assets/solana.png"}
-						width={40}
+						width={32}
 						className="rounded-full"
 					/>
 				);
@@ -86,9 +84,9 @@ export default function EventItem({ event }: EventItemProps) {
 				return (
 					<Image
 						alt="logo"
-						height={40}
+						height={32}
 						src={"/assets/sonic.png"}
-						width={40}
+						width={32}
 						className="rounded-full"
 					/>
 				);
@@ -102,7 +100,7 @@ export default function EventItem({ event }: EventItemProps) {
 					<div className="flex items-center gap-2">
 						{renderNetworkIcon}
 						<div className="flex flex-col">
-							<p className="text-md text-primary">
+							<p className="text-sm text-primary">
 								Eventprotocol <br />
 								<span className="text-sm capitalize text-white">
 									{event.network}
@@ -110,7 +108,7 @@ export default function EventItem({ event }: EventItemProps) {
 							</p>
 						</div>
 					</div>
-					<div className="w-1/2 text-right text-xs">
+					<div className="text-right text-xs">
 						{renderStatusLabel}
 					</div>
 				</div>
